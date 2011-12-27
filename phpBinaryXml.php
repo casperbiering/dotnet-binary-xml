@@ -1,16 +1,5 @@
 <?php
 
-/*
- * Not yet implemented:
- * int64
- * decimal
- * datetime
- * uniqueid
- * timespan
- * uuid
- * uint64
- */
-
 /**
  * Main exeception for phpBinaryXml
  *

@@ -1,0 +1,15 @@
+This is a PHP implementation of .NET Binary Format: XML Data Structure (MC-NBFX).
+
+The official specification can be found at:
+http://msdn.microsoft.com/en-us/library/cc219210(PROT.10).aspx
+
+The following text record types is currently not implemented:
+ * int64
+ * decimal
+ * datetime
+ * uniqueid
+ * timespan
+ * uuid
+ * uint64
+
+
