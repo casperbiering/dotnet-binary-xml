@@ -3,6 +3,8 @@ This is a PHP implementation of .NET Binary Format: XML Data Structure (MC-NBFX)
 The official specification can be found at:
 http://msdn.microsoft.com/en-us/library/cc219210(PROT.10).aspx
 
+Only decoding is supported.
+
 The following text record types is currently not implemented:
  * int64
  * decimal
@@ -12,4 +14,7 @@ The following text record types is currently not implemented:
  * uuid
  * uint64
 
+Required PHP extensions:
+* xmlwriter
+* mbstring
 
