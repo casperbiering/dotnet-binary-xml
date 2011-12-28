@@ -782,7 +782,7 @@ class phpBinaryXml {
             case self::RECORD_TYPE_QNAMEDICTIONARY_TEXT_WITH_END_ELEMENT:
 		$prefix = chr(97+ord($content{$pos}));
 		$pos += 1;
-
+                
 		$name = self::getDictionaryString($content, $pos);
                 return $prefix.':str'.$name;
             break;
@@ -791,7 +791,6 @@ class phpBinaryXml {
             break;
         }
     }
-    
 }
 
 ?>
