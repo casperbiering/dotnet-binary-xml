@@ -3,18 +3,24 @@ This is a PHP implementation of .NET Binary Format: XML Data Structure (MC-NBFX)
 The official specification can be found at:
 http://msdn.microsoft.com/en-us/library/cc219210(PROT.10).aspx
 
-Only decoding is supported.
-
-The following text record types is currently not implemented:
- * int64
- * decimal
- * datetime
- * uniqueid
- * timespan
- * uuid
- * uint64
-
 Required PHP extensions:
 * xmlwriter
 * mbstring
+* gmp
+
+Known/Missing issues:
+* only decoding is supported
+* timespan not implemented
+* local timezone offset in datetime
+
+Specification inconsistencies:
+
+1) http://msdn.microsoft.com/en-us/library/cc219251(v=PROT.10).aspx says that
+"If the hour, minutes, seconds, and fraction of second parts are zero, the date MUST
+be interpreted as the following characters. yyyy-MM-dd". That does not
+match the examples.
+
+2) http://msdn.microsoft.com/en-us/library/cc219270(v=PROT.10).aspx says that
+UnicodeChars32TextRecord MUST be encoded using MultiByteInt31. That does not
+match the examples.
 

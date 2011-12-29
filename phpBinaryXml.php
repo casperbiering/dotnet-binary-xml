@@ -147,7 +147,7 @@ class phpBinaryXml {
     const RECORD_TYPE_INT32_TEXT = 0x8C;
     const RECORD_TYPE_INT32_TEXT_WITH_END_ELEMENT = 0x8D;
     const RECORD_TYPE_INT64_TEXT = 0x8E;
-    const RECORD_TYPE_INT64_TEXT_WITH_END_ELEMENT = 0x9F;
+    const RECORD_TYPE_INT64_TEXT_WITH_END_ELEMENT = 0x8F;
     const RECORD_TYPE_FLOAT_TEXT = 0x90;
     const RECORD_TYPE_FLOAT_TEXT_WITH_END_ELEMENT = 0x91;
     const RECORD_TYPE_DOUBLE_TEXT = 0x92;
@@ -464,6 +464,7 @@ class phpBinaryXml {
                 case self::RECORD_TYPE_INT8_TEXT:
                 case self::RECORD_TYPE_INT16_TEXT:
                 case self::RECORD_TYPE_INT32_TEXT:
+                case self::RECORD_TYPE_INT64_TEXT:
                 case self::RECORD_TYPE_FLOAT_TEXT:
                 case self::RECORD_TYPE_DOUBLE_TEXT:
                 case self::RECORD_TYPE_DECIMAL_TEXT:
@@ -476,6 +477,10 @@ class phpBinaryXml {
                 case self::RECORD_TYPE_BYTES32_TEXT:
                 case self::RECORD_TYPE_EMPTY_TEXT:
                 case self::RECORD_TYPE_DICTIONARY_TEXT:
+                case self::RECORD_TYPE_UNIQUEID_TEXT:
+                case self::RECORD_TYPE_TIMESPAN_TEXT:
+                case self::RECORD_TYPE_UUID_TEXT:
+                case self::RECORD_TYPE_UINT64_TEXT:
                 case self::RECORD_TYPE_BOOL_TEXT:
                 case self::RECORD_TYPE_UNICODECHARS8_TEXT:
                 case self::RECORD_TYPE_UNICODECHARS16_TEXT:
@@ -492,6 +497,7 @@ class phpBinaryXml {
                 case self::RECORD_TYPE_INT8_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_INT16_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_INT32_TEXT_WITH_END_ELEMENT:
+                case self::RECORD_TYPE_INT64_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_FLOAT_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_DOUBLE_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_DECIMAL_TEXT_WITH_END_ELEMENT:
@@ -504,6 +510,10 @@ class phpBinaryXml {
                 case self::RECORD_TYPE_BYTES32_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_EMPTY_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_DICTIONARY_TEXT_WITH_END_ELEMENT:
+                case self::RECORD_TYPE_UNIQUEID_TEXT_WITH_END_ELEMENT:
+                case self::RECORD_TYPE_TIMESPAN_TEXT_WITH_END_ELEMENT:
+                case self::RECORD_TYPE_UUID_TEXT_WITH_END_ELEMENT:
+                case self::RECORD_TYPE_UINT64_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_BOOL_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_UNICODECHARS8_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_UNICODECHARS16_TEXT_WITH_END_ELEMENT:
@@ -524,9 +534,6 @@ class phpBinaryXml {
     }
     
     static public function getDictionaryString(&$content, &$pos) {
-        
-        // Parsed as MultiByteInt31:
-        // http://msdn.microsoft.com/en-us/library/cc219227(v=PROT.10)
         
         $part_a = ord($content{$pos});
         $value_a = substr(str_pad(decbin($part_a),8,"0",STR_PAD_LEFT), 1, 7);
@@ -618,6 +625,16 @@ class phpBinaryXml {
                 $pos += 4;
                 return (string) $record[1];
             break;
+            case self::RECORD_TYPE_INT64_TEXT:
+            case self::RECORD_TYPE_INT64_TEXT_WITH_END_ELEMENT:
+                
+                if(!function_exists('gmp_init')) throw new phpBinaryXmlException('Int64 requires GMP extension');
+                
+                list(,$int64_hex) = unpack("H*", strrev(substr($content,$pos,8)));
+                $pos += 8;
+                
+                return (string) gmp_strval(gmp_init($int64_hex, 16), 10);
+            break;
             case self::RECORD_TYPE_FLOAT_TEXT:
             case self::RECORD_TYPE_FLOAT_TEXT_WITH_END_ELEMENT:
                 $record = unpack("f*", substr($content, $pos, 4));
@@ -633,26 +650,91 @@ class phpBinaryXml {
             case self::RECORD_TYPE_DECIMAL_TEXT:
             case self::RECORD_TYPE_DECIMAL_TEXT_WITH_END_ELEMENT:
                 
-                if(PHP_INT_SIZE < 8) throw new phpBinaryXmlException('Decimal requires 64-bit support');
+                if(!function_exists('gmp_init')) throw new phpBinaryXmlException('Decimal requires GMP extension');
                 
-                // http://msdn.microsoft.com/en-us/library/cc219250(v=PROT.10).aspx
+                $pos += 2; // First 2 bytes reserved
                 
-                $pos += 16;
+                $scale = ord($content{$pos});
+                $pos += 1;
                 
-                return '999';
+                $sign = ord($content{$pos});
+                $pos += 1;
+                
+                list(,$hi32_hex) = unpack("H*", strrev(substr($content,$pos,4)));
+                $pos += 4;
+                $hi32 = gmp_init($hi32_hex, 16);
+                
+                list(,$lo64_hex) = unpack("H*", strrev(substr($content,$pos,8)));
+                $pos += 8;
+                $lo64 = gmp_init($lo64_hex, 16);
+                
+                $value = gmp_add(gmp_mul($hi32, gmp_pow(2, 64)), $lo64);
+                
+                $record = gmp_strval($value, 10);
+                
+                if($scale > 0) {
+                    if($scale > strlen($record)) {
+                        $record = str_repeat("0", $scale-strlen($record)) . $record;
+                    }
+                    
+                    $record = substr($record, 0, strlen($record)-$scale).".".substr($record, $scale*-1);
+                    
+                    $record = trim($record, "0");
+                    if($record{0} == ".") {
+                        $record = "0".$record;
+                    }
+                }
+                
+                if($sign == 0x80) {
+                    $record = "-".$record;
+                }
+                
+                return $record;
+                
             break;
             case self::RECORD_TYPE_DATETIME_TEXT:
             case self::RECORD_TYPE_DATETIME_TEXT_WITH_END_ELEMENT:
                 
-                if(PHP_INT_SIZE < 8) throw new phpBinaryXmlException('Datetime requires 64-bit support');
+                if(!function_exists('gmp_init')) throw new phpBinaryXmlException('Datetime requires GMP extension');
                 
-                // http://stackoverflow.com/questions/2629983/binary-to-date-c-64-bit-format
-                // http://msdn.microsoft.com/en-us/library/cc219251(v=PROT.10).aspx
+                $binary = "";
+                for($i = 0; $i < 8; $i++) {
+                    list(,$byteint) = unpack("C*", $content{$pos+$i});
+                    $binary = sprintf("%08b", $byteint) . $binary;
+                }
+                $pos += 8;
                 
-                $pos += 62;
-                $pos += 2;
+                $value = gmp_init(substr($binary, 2, 62), 2);
                 
-                return '999';
+                // Only calc with seconds, since PHP datetime doesn't support fractions
+                $value_secs_remaining = gmp_div($value, '10000000');
+                
+                // Load PHP datetime with seconds remaining (and compensate for using unix timestamp)
+                $datetime = new DateTime("@".gmp_strval(gmp_sub($value_secs_remaining, '62135596800'), 10), new DateTimeZone('UTC'));
+                $date = $datetime->format('Y-m-d');
+                $time = $datetime->format('H:i:s');
+                
+                // Get fractions
+                $fraction = substr(gmp_strval($value, 10), -7);
+                
+                // Join different time elements
+                if($fraction !== "0000000") {
+                    $record = "${date}T${time}.${fraction}";
+                } elseif($time !== "00:00:00") {
+                    $record = "${date}T${time}";
+                } else {
+                    $record = "${date}";
+                }
+                
+                // Add timezone info
+                $tz = gmp_intval(gmp_init(substr($binary, 0, 2), 2));
+                if($tz == 2) {
+                    // TODO: local time handling
+                } elseif($tz == 1) {
+                    $record .= 'Z';
+                }
+                
+                return $record;
             break;
             case self::RECORD_TYPE_CHARS8_TEXT:
             case self::RECORD_TYPE_CHARS8_TEXT_WITH_END_ELEMENT:
@@ -676,7 +758,7 @@ class phpBinaryXml {
             break;
             case self::RECORD_TYPE_CHARS32_TEXT:
             case self::RECORD_TYPE_CHARS32_TEXT_WITH_END_ELEMENT:
-                list(,$record_length) = unpack("L*", substr($content, $pos, 4));
+                list(,$record_length) = unpack("l*", substr($content, $pos, 4));
                 $pos += 4;
                 
                 $record = substr($content, $pos, $record_length);
@@ -706,7 +788,7 @@ class phpBinaryXml {
             break;
             case self::RECORD_TYPE_BYTES32_TEXT:
             case self::RECORD_TYPE_BYTES32_TEXT_WITH_END_ELEMENT:
-                list(,$record_length) = unpack("L*", substr($content, $pos, 4));
+                list(,$record_length) = unpack("l*", substr($content, $pos, 4));
                 $pos += 4;
                 
                 $record = substr($content, $pos, $record_length);
@@ -733,6 +815,104 @@ class phpBinaryXml {
             case self::RECORD_TYPE_DICTIONARY_TEXT:
             case self::RECORD_TYPE_DICTIONARY_TEXT_WITH_END_ELEMENT:
                 return 'str'.self::getDictionaryString($content, $pos);
+            break;
+            case self::RECORD_TYPE_UNIQUEID_TEXT:
+            case self::RECORD_TYPE_UNIQUEID_TEXT_WITH_END_ELEMENT:
+            case self::RECORD_TYPE_UUID_TEXT:
+            case self::RECORD_TYPE_UUID_TEXT_WITH_END_ELEMENT:
+                
+                list(,$data1) = unpack("H*", strrev(substr($content, $pos, 4)));
+                $pos += 4;
+                
+                list(,$data2) = unpack("H*", strrev(substr($content, $pos, 2)));
+                $pos += 2;
+                
+                list(,$data3) = unpack("H*", strrev(substr($content, $pos, 2)));
+                $pos += 2;
+                
+                list(,$data4) = unpack("H*", substr($content, $pos, 2));
+                $pos += 2;
+                
+                list(,$data5) = unpack("H*", substr($content, $pos, 6));
+                $pos += 6;
+                
+                $record = "{$data1}-{$data2}-{$data3}-{$data4}-{$data5}";
+                
+                if($record_type == self::RECORD_TYPE_UNIQUEID_TEXT ||
+                   $record_type == self::RECORD_TYPE_UNIQUEID_TEXT_WITH_END_ELEMENT) {
+                    $record = "urn:uuid:".$record;
+                }
+                
+                return $record;
+            break;
+            /*case self::RECORD_TYPE_TIMESPAN_TEXT:
+            case self::RECORD_TYPE_TIMESPAN_TEXT_WITH_END_ELEMENT:
+                
+                if(!function_exists('gmp_init')) throw new phpBinaryXmlException('Timespan requires GMP extension');
+                
+                $binary = "";
+                for($i = 0; $i < 8; $i++) {
+                    list(,$byteint) = unpack("C*", $content{$pos+$i});
+                    $binary = sprintf("%08b", $byteint);
+                }
+                $pos += 8;
+                
+                $value = gmp_init($binary, 2);
+                
+                $remaining_value = gmp_abs($value);
+                
+                $one_day = gmp_init('864000000000');
+                $one_hour = gmp_init('36000000000');
+                $one_min = gmp_init('600000000');
+                $one_sec = gmp_init('10000000');
+                
+                $days = gmp_div($remaining_value, $one_day);
+                $remaining_value = gmp_sub($remaining_value, gmp_mul($days, $one_day));
+                
+                $hours = gmp_div($remaining_value, $one_hour);
+                $remaining_value = gmp_sub($remaining_value, gmp_mul($hours, $one_hour));
+                
+                $mins = gmp_div($remaining_value, $one_min);
+                $remaining_value = gmp_sub($remaining_value, gmp_mul($mins, $one_min));
+                
+                $secs = gmp_div($remaining_value, $one_sec);
+                $remaining_value = gmp_sub($remaining_value, gmp_mul($secs, $one_sec));
+                
+                $fracs = $remaining_value;
+                
+                $days  = gmp_intval($days);
+                $hours = gmp_intval($hours);
+                $mins  = gmp_intval($mins);
+                $secs  = gmp_intval($secs);
+                $fracs = gmp_intval($fracs);
+                
+                $record = str_pad($hours, 2, "0", STR_PAD_LEFT).":".
+                    str_pad($mins, 2, "0", STR_PAD_LEFT).":".
+                    str_pad($secs, 2, "0", STR_PAD_LEFT);
+                
+                if($fracs > 0) {
+                    $record .= ".".$fracs;
+                }
+                
+                if($days > 0) {
+                    $record = $days.".".$record;
+                }
+                
+                if(gmp_sign($value) == -1) {
+                    $record = "-".$record;
+                }
+                
+                return $record;
+            break;*/
+            case self::RECORD_TYPE_UINT64_TEXT:
+            case self::RECORD_TYPE_UINT64_TEXT_WITH_END_ELEMENT:
+                
+                if(!function_exists('gmp_init')) throw new phpBinaryXmlException('Uint64 requires GMP extension');
+                
+                list(,$uint64_hex) = unpack("H*", strrev(substr($content,$pos,8)));
+                $pos +=8;
+                
+                return (string) gmp_strval(gmp_init($uint64_hex, 16), 10);
             break;
             case self::RECORD_TYPE_BOOL_TEXT:
             case self::RECORD_TYPE_BOOL_TEXT_WITH_END_ELEMENT:
@@ -770,7 +950,7 @@ class phpBinaryXml {
             break;
             case self::RECORD_TYPE_UNICODECHARS32_TEXT:
             case self::RECORD_TYPE_UNICODECHARS32_TEXT_WITH_END_ELEMENT:
-                list(,$record_length) = unpack("L*", substr($content, $pos, 4));
+                list(,$record_length) = unpack("l*", substr($content, $pos, 4));
                 $pos += 4;
                 
                 $record = substr($content, $pos, $record_length);
