@@ -3,10 +3,11 @@ This is a PHP implementation of .NET Binary Format: XML Data Structure (MC-NBFX)
 The official specification can be found at:
 http://msdn.microsoft.com/en-us/library/cc219210(PROT.10).aspx
 
-Required PHP extensions:
-* xmlwriter
-* mbstring
-* gmp
+Requirements:
+* XMLWriter (PHP extension)
+* MBString (PHP extension)
+* GMP (PHP extension)
+* Optional: DOM (PHP extension)
 
 Known/Missing issues:
 * only decoding is supported
