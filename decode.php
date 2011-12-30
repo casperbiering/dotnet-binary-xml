@@ -2,6 +2,11 @@
 
 require 'phpBinaryXml.php';
 
+if(PHP_SAPI !== 'cli') {
+    echo "Can only be run in CLI-mode.\n";
+    exit(3);
+}
+
 if($_SERVER['argc'] < 2) {
     echo "Syntax: php ".$_SERVER['argv'][0]." <filename>\n";
     exit(1);

@@ -1,5 +1,10 @@
 <?php
 
+if(PHP_SAPI !== 'cli') {
+    echo "Can only be run in CLI-mode.\n";
+    exit(3);
+}
+
 $testdata = <<< WEBSITEDATA
 40 03 64 6F 63 01
 02 07 63 6F 6D 6D 65 6E 74
