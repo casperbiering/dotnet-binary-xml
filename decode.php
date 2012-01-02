@@ -18,12 +18,8 @@ if(!is_readable($_SERVER['argv'][1])) {
 }
 
 $content = file_get_contents($_SERVER['argv'][1]);
-$output = phpBinaryXml::decode($content);
+$output = phpBinaryXml::decode($content, true);
 
-$xml = new DOMDocument();
-$xml->loadXML($output);
-$xml->preserveWhiteSpace = false;
-$xml->formatOutput = true;
-echo $xml->saveXML();
+echo $output;
 
 exit(0);

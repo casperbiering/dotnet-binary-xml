@@ -193,13 +193,18 @@ class phpBinaryXml {
     const RECORD_TYPE_QNAMEDICTIONARY_TEXT = 0xBC;
     const RECORD_TYPE_QNAMEDICTIONARY_TEXT_WITH_END_ELEMENT = 0xBD;
     
-    static function decode($content) {
+    static function decode($content, $indent = false) {
+    	
+    	if(empty($content)) {
+    		throw new phpBinaryXmlException("Empty content");
+    	}
         
         $pos = 0;
         $content_length = strlen($content);
         
         $xmlwriter = new XMLWriter();
         $xmlwriter->openMemory();
+        if($indent) $xmlwriter->setIndent(true);
         
         while($pos < $content_length) {
             switch(ord($content{$pos})) {
@@ -488,7 +493,7 @@ class phpBinaryXml {
                 case self::RECORD_TYPE_QNAMEDICTIONARY_TEXT:
                     $record = self::getTextRecord($content, $pos);
                     
-                    $xmlwriter->writeRaw($record);
+                    $xmlwriter->text($record);
                 break;
                 case self::RECORD_TYPE_ZERO_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_ONE_TEXT_WITH_END_ELEMENT:
@@ -521,7 +526,7 @@ class phpBinaryXml {
                 case self::RECORD_TYPE_QNAMEDICTIONARY_TEXT_WITH_END_ELEMENT:
                     $record = self::getTextRecord($content, $pos);
                     
-                    $xmlwriter->writeRaw($record);
+                    $xmlwriter->text($record);
                     $xmlwriter->fullEndElement();
                 break;
                 default:
@@ -530,7 +535,7 @@ class phpBinaryXml {
             }
         }
         
-        return $xmlwriter->flush();
+        return $xmlwriter->flush(true);
     }
     
     static public function getDictionaryString(&$content, &$pos) {
