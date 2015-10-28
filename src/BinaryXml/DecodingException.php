@@ -2,6 +2,6 @@
 
 namespace CasperBiering\Dotnet\BinaryXml;
 
-class Exception extends \Exception
+class DecodingException extends \RuntimeException
 {
 }

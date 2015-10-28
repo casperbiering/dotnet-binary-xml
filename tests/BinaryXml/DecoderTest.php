@@ -1,22 +1,31 @@
 <?php
 
-namespace CasperBiering\Dotnet\Tests;
+namespace CasperBiering\Dotnet\Tests\BinaryXml;
 
-use CasperBiering\Dotnet\BinaryXml;
+use CasperBiering\Dotnet\BinaryXml\Decoder;
 
-class BinaryXmlTest extends \PHPUnit_Framework_TestCase
+class DecoderTest extends \PHPUnit_Framework_TestCase
 {
+    public function testIndent()
+    {
+        $binary = $this->convertToBinary('40 03 64 6F 63 40 03 61 62 63 01 01');
+        $expected = "<doc>\n <abc></abc>\n</doc>\n";
+
+        $decoder = new Decoder(array('indent' => true));
+        $actual = $decoder->decode($binary);
+
+        $this->assertEquals($expected, $actual);
+    }
+
     /**
      * @dataProvider specExamples
      */
     public function testSpecExample($hexcodes, $expected)
     {
-        $binary = '';
-        foreach (explode(' ', trim($hexcodes)) as $code) {
-            $binary .= pack('H*', $code);
-        }
+        $binary = $this->convertToBinary($hexcodes);
+        $decoder = new Decoder();
 
-        $actual = BinaryXml::decode($binary);
+        $actual = $decoder->decode($binary);
 
         $this->assertEquals($expected, $actual);
     }
@@ -108,5 +117,10 @@ class BinaryXmlTest extends \PHPUnit_Framework_TestCase
             array('40 03 64 6F 63 B0 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 01', '<doc>03020100-0504-0706-0809-0a0b0c0d0e0f</doc>'),
             array('40 02 49 44 B1 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F', '<ID>03020100-0504-0706-0809-0a0b0c0d0e0f</ID>'),
         );
+    }
+
+    private function convertToBinary($hexString)
+    {
+        return pack('H*', preg_replace('/\s+/', '', $hexString));
     }
 }
