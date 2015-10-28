@@ -18,6 +18,63 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     */
+    public function testEmpty()
+    {
+        $decoder = new Decoder();
+        $decoder->decode('');
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Invalid MultiByteInt31 at position 1.
+     */
+    public function testInvalidMultiByteInt31()
+    {
+        $binary = $this->convertToBinary('40 80 80 80 80 80');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Unknown record type 0xF0 at position 3.
+     */
+    public function testInvalidRecordType()
+    {
+        $binary = $this->convertToBinary('40 01 61 F0 F1 F2');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Unknown record type 0xF0 at position 7.
+     */
+    public function testInvalidArrayElementRecordType()
+    {
+        $binary = $this->convertToBinary('03 40 01 61 01 F0 F1 F2');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Unknown boolean value 0xF0 at position 5.
+     */
+    public function testInvalidBoolean()
+    {
+        $binary = $this->convertToBinary('40 01 61 B5 F0');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
+    /**
      * @dataProvider specExamples
      */
     public function testSpecExample($hexcodes, $expected)
