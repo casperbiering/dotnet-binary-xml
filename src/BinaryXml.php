@@ -319,6 +319,7 @@ class BinaryXml
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_N:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_O:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_P:
+                case self::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_Q:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_R:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_S:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_T:
@@ -352,6 +353,7 @@ class BinaryXml
                 case self::RECORD_TYPE_PREFIX_ATTRIBUTE_N:
                 case self::RECORD_TYPE_PREFIX_ATTRIBUTE_O:
                 case self::RECORD_TYPE_PREFIX_ATTRIBUTE_P:
+                case self::RECORD_TYPE_PREFIX_ATTRIBUTE_Q:
                 case self::RECORD_TYPE_PREFIX_ATTRIBUTE_R:
                 case self::RECORD_TYPE_PREFIX_ATTRIBUTE_S:
                 case self::RECORD_TYPE_PREFIX_ATTRIBUTE_T:
@@ -411,6 +413,7 @@ class BinaryXml
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_N:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_O:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_P:
+                case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_Q:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_R:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_S:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_T:
@@ -443,6 +446,7 @@ class BinaryXml
                 case self::RECORD_TYPE_PREFIX_ELEMENT_N:
                 case self::RECORD_TYPE_PREFIX_ELEMENT_O:
                 case self::RECORD_TYPE_PREFIX_ELEMENT_P:
+                case self::RECORD_TYPE_PREFIX_ELEMENT_Q:
                 case self::RECORD_TYPE_PREFIX_ELEMENT_R:
                 case self::RECORD_TYPE_PREFIX_ELEMENT_S:
                 case self::RECORD_TYPE_PREFIX_ELEMENT_T:
