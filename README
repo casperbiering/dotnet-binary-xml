@@ -7,7 +7,6 @@ Requirements:
 * XMLWriter (PHP extension)
 * MBString (PHP extension)
 * GMP (PHP extension)
-* Optional: DOM (PHP extension)
 
 Known/Missing issues:
 * only decoding is supported

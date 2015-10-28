@@ -1,0 +1,25 @@
+{
+    "name": "casperbiering/dotnet-binary-xml",
+    "description": "Parsing of .NET Binary Format",
+    "require": {
+        "php": ">=5.3",
+        "ext-xmlwriter": "*",
+        "ext-gmp": "*",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "CasperBiering\\Dotnet\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Casper Biering",
+            "email": "casper@biering.dk"
+        }
+    ]
+}
