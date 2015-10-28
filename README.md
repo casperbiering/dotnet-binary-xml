@@ -19,7 +19,6 @@ Just install [Composer](http://getcomposer.org) and run `composer require casper
 ## Known/Missing Issues
 
 * only decoding is supported
-* timespan not implemented
 * local timezone offset in datetime
 
 ### Specification Inconsistencies

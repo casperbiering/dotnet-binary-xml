@@ -193,8 +193,8 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
             array('42 9A 01 B3 FE FF FF FF FF FF FF FF', '<str154>18446744073709551614</str154>'),
             array('40 03 64 6F 63 AC 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF 01', '<doc>urn:uuid:33221100-5544-7766-8899-aabbccddeeff</doc>'),
             array('42 1A AD 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF', '<str26>urn:uuid:33221100-5544-7766-8899-aabbccddeeff</str26>'),
-            //array('40 03 64 6F 63 AE 00 C4 F5 32 FF FF FF FF 01', '<doc>-PT5M44S</doc>'),
-            //array('42 94 07 AF 00 B0 8E F0 1B 00 00 00', '<str916>PT3H20M</str916>'),
+            array('40 03 64 6F 63 AE 00 C4 F5 32 FF FF FF FF 01', '<doc>-PT5M44S</doc>'),
+            array('42 94 07 AF 00 B0 8E F0 1B 00 00 00', '<str916>PT3H20M</str916>'),
             array('40 03 64 6F 63 B0 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 01', '<doc>03020100-0504-0706-0809-0a0b0c0d0e0f</doc>'),
             array('40 02 49 44 B1 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F', '<ID>03020100-0504-0706-0809-0a0b0c0d0e0f</ID>'),
         );

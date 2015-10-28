@@ -698,65 +698,65 @@ class Decoder
 
                 return $record;
             break;
-            /*case Constants::RECORD_TYPE_TIMESPAN_TEXT:
+            case Constants::RECORD_TYPE_TIMESPAN_TEXT:
             case Constants::RECORD_TYPE_TIMESPAN_TEXT_WITH_END_ELEMENT:
+                if (!function_exists('gmp_init')) {
+                    throw new DecodingException('Timespan requires GMP extension');
+                }
 
-                if(!function_exists('gmp_init')) throw new DecodingException('Timespan requires GMP extension');
-
-                $binary = "";
-                for($i = 0; $i < 8; $i++) {
-                    list(,$byteint) = unpack("C*", $content{$pos+$i});
-                    $binary = sprintf("%08b", $byteint);
+                $value = '';
+                for ($i = 0; $i < 8; $i++) {
+                    list(, $byte) = unpack('C*', $content{$pos + $i});
+                    $value = sprintf('%08b', $byte).$value;
                 }
                 $pos += 8;
 
-                $value = gmp_init($binary, 2);
+                $value = gmp_init($value, 2);
 
-                $remainingValue = gmp_abs($value);
+                $minus = false;
+                if (gmp_testbit($value, 63)) {
+                    $minus = true;
+                    $mask = gmp_init(str_repeat('1', 64), '2');
+                    $value = gmp_and(gmp_com($value), $mask);
+                    $value = gmp_add($value, 1);
+                }
 
-                $oneDay = gmp_init('864000000000');
-                $oneHour = gmp_init('36000000000');
-                $oneMin = gmp_init('600000000');
-                $oneSec = gmp_init('10000000');
+                $remaining = gmp_abs($value);
+                list($days, $remaining) = gmp_div_qr($remaining, gmp_init('864000000000'));
+                list($hours, $remaining) = gmp_div_qr($remaining, gmp_init('36000000000'));
+                list($mins, $remaining) = gmp_div_qr($remaining, gmp_init('600000000'));
+                list($secs, $remaining) = gmp_div_qr($remaining, gmp_init('10000000'));
+                $fracs = $remaining;
 
-                $days = gmp_div($remainingValue, $oneDay);
-                $remainingValue = gmp_sub($remainingValue, gmp_mul($days, $oneDay));
-
-                $hours = gmp_div($remainingValue, $oneHour);
-                $remainingValue = gmp_sub($remainingValue, gmp_mul($hours, $oneHour));
-
-                $mins = gmp_div($remainingValue, $oneMin);
-                $remainingValue = gmp_sub($remainingValue, gmp_mul($mins, $oneMin));
-
-                $secs = gmp_div($remainingValue, $oneSec);
-                $remainingValue = gmp_sub($remainingValue, gmp_mul($secs, $oneSec));
-
-                $fracs = $remainingValue;
-
-                $days  = gmp_intval($days);
+                $days = gmp_intval($days);
                 $hours = gmp_intval($hours);
-                $mins  = gmp_intval($mins);
-                $secs  = gmp_intval($secs);
+                $mins = gmp_intval($mins);
+                $secs = gmp_intval($secs);
                 $fracs = gmp_intval($fracs);
 
-                $record = str_pad($hours, 2, "0", STR_PAD_LEFT).":".
-                    str_pad($mins, 2, "0", STR_PAD_LEFT).":".
-                    str_pad($secs, 2, "0", STR_PAD_LEFT);
-
-                if($fracs > 0) {
-                    $record .= ".".$fracs;
+                $record = ($minus ? '-P' : 'P');
+                if ($days > 0) {
+                    $record .= $days.'D';
                 }
-
-                if($days > 0) {
-                    $record = $days.".".$record;
-                }
-
-                if(gmp_sign($value) == -1) {
-                    $record = "-".$record;
+                if ($hours > 0 || $mins > 0 || $secs > 0 || $fracs > 0) {
+                    $record .= 'T';
+                    if ($hours > 0) {
+                        $record .= $hours.'H';
+                    }
+                    if ($mins > 0) {
+                        $record .= $mins.'M';
+                    }
+                    if ($secs > 0 || $fracs > 0) {
+                        $record .= $secs;
+                        if ($fracs > 0) {
+                            $record .= '.'.$fracs;
+                        }
+                        $record .= 'S';
+                    }
                 }
 
                 return $record;
-            break;*/
+            break;
             case Constants::RECORD_TYPE_UINT64_TEXT:
             case Constants::RECORD_TYPE_UINT64_TEXT_WITH_END_ELEMENT:
 
