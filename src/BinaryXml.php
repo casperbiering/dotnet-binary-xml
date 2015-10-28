@@ -820,7 +820,7 @@ class BinaryXml
             break;
             case self::RECORD_TYPE_START_LIST_TEXT:
 
-        $record = '';
+                $record = '';
                 while (ord($content{$pos}) != self::RECORD_TYPE_END_LIST_TEXT) {
                     if ($record !== '') {
                         $record .= ' ';
@@ -828,7 +828,7 @@ class BinaryXml
                     $record .= self::getTextRecord($content, $pos);
                 }
 
-        $pos += 1; // skip 1 for end list
+                $pos += 1; // skip 1 for end list
 
                 return $record;
             break;
@@ -863,7 +863,7 @@ class BinaryXml
                 $record = "{$data1}-{$data2}-{$data3}-{$data4}-{$data5}";
 
                 if ($record_type == self::RECORD_TYPE_UNIQUEID_TEXT ||
-                   $record_type == self::RECORD_TYPE_UNIQUEID_TEXT_WITH_END_ELEMENT) {
+                    $record_type == self::RECORD_TYPE_UNIQUEID_TEXT_WITH_END_ELEMENT) {
                     $record = 'urn:uuid:'.$record;
                 }
 
@@ -942,16 +942,16 @@ class BinaryXml
             break;
             case self::RECORD_TYPE_BOOL_TEXT:
             case self::RECORD_TYPE_BOOL_TEXT_WITH_END_ELEMENT:
-        $record = ord($content{$pos});
-        $pos += 1;
-        switch ($record) {
-            case 0:
-                return 'false';
-            break;
-            case 1:
-                return 'true';
-            break;
-        }
+                $record = ord($content{$pos});
+                $pos += 1;
+                switch ($record) {
+                    case 0:
+                        return 'false';
+                    break;
+                    case 1:
+                        return 'true';
+                    break;
+                }
                 throw new BinaryXml\Exception('Unknown value for bool <'.dechex($record).'> on pos <'.$pos.'>');
             break;
             case self::RECORD_TYPE_UNICODECHARS8_TEXT:
@@ -986,10 +986,10 @@ class BinaryXml
             break;
             case self::RECORD_TYPE_QNAMEDICTIONARY_TEXT:
             case self::RECORD_TYPE_QNAMEDICTIONARY_TEXT_WITH_END_ELEMENT:
-        $prefix = chr(97 + ord($content{$pos}));
-        $pos += 1;
+                $prefix = chr(97 + ord($content{$pos}));
+                $pos += 1;
 
-        $name = self::getDictionaryString($content, $pos);
+                $name = self::getDictionaryString($content, $pos);
 
                 return $prefix.':str'.$name;
             break;
