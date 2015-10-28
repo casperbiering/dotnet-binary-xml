@@ -213,7 +213,7 @@ class BinaryXml
                 case self::RECORD_TYPE_COMMENT:
                     $pos += 1;
 
-                    $comment = self::getString($content, $pos);
+                    $comment = self::readString($content, $pos);
                     $xmlwriter->writeComment($comment);
 
                 break;
@@ -222,7 +222,7 @@ class BinaryXml
 
                     // Element
                     $pos += 1; // expect it to be 0x40
-                    $element = self::getString($content, $pos);
+                    $element = self::readString($content, $pos);
                     $pos += 1; // expect it to be 0x01
 
                     // Record type
@@ -235,7 +235,7 @@ class BinaryXml
 
                     // Entries
                     for ($entry = 0; $entry < $length; ++$entry) {
-                        $value = self::getTextRecordInner($content, $pos, $record_type);
+                        $value = self::readTextRecordInner($content, $pos, $record_type);
                         $xmlwriter->writeElement($element, $value);
                     }
 
@@ -243,8 +243,8 @@ class BinaryXml
                 case self::RECORD_TYPE_SHORT_ATTRIBUTE:
                     $pos += 1;
 
-                    $name = self::getString($content, $pos);
-                    $value = self::getTextRecord($content, $pos);
+                    $name = self::readString($content, $pos);
+                    $value = self::readTextRecord($content, $pos);
 
                     $xmlwriter->writeAttribute($name, $value);
 
@@ -252,9 +252,9 @@ class BinaryXml
                 case self::RECORD_TYPE_ATTRIBUTE:
                     $pos += 1;
 
-                    $prefix = self::getString($content, $pos);
-                    $name = self::getString($content, $pos);
-                    $value = self::getTextRecord($content, $pos);
+                    $prefix = self::readString($content, $pos);
+                    $name = self::readString($content, $pos);
+                    $value = self::readTextRecord($content, $pos);
 
                     $xmlwriter->writeAttribute($prefix.':'.$name, $value);
 
@@ -262,26 +262,26 @@ class BinaryXml
                 case self::RECORD_TYPE_SHORT_DICTIONARY_ATTRIBUTE:
                     $pos += 1;
 
-                    $name = self::getDictionaryString($content, $pos);
-                    $value = self::getTextRecord($content, $pos);
+                    $name = self::readDictionaryString($content, $pos);
+                    $value = self::readTextRecord($content, $pos);
 
-                    $xmlwriter->writeAttribute('str'.$name, $value);
+                    $xmlwriter->writeAttribute($name, $value);
 
                 break;
                 case self::RECORD_TYPE_DICTIONARY_ATTRIBUTE:
                     $pos += 1;
 
-                    $prefix = self::getString($content, $pos);
-                    $name = self::getDictionaryString($content, $pos);
-                    $value = self::getTextRecord($content, $pos);
+                    $prefix = self::readString($content, $pos);
+                    $name = self::readDictionaryString($content, $pos);
+                    $value = self::readTextRecord($content, $pos);
 
-                    $xmlwriter->writeAttribute($prefix.':str'.$name, $value);
+                    $xmlwriter->writeAttribute($prefix.':'.$name, $value);
 
                 break;
                 case self::RECORD_TYPE_SHORT_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
-                    $value = self::getString($content, $pos);
+                    $value = self::readString($content, $pos);
 
                     $xmlwriter->writeAttribute('xmlns', $value);
 
@@ -289,8 +289,8 @@ class BinaryXml
                 case self::RECORD_TYPE_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
-                    $name = self::getString($content, $pos);
-                    $value = self::getString($content, $pos);
+                    $name = self::readString($content, $pos);
+                    $value = self::readString($content, $pos);
 
                     $xmlwriter->writeAttribute('xmlns:'.$name, $value);
 
@@ -298,7 +298,7 @@ class BinaryXml
                 case self::RECORD_TYPE_SHORT_DICTIONARY_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
-                    $value = self::getDictionaryString($content, $pos);
+                    $value = self::readDictionaryString($content, $pos);
 
                     $xmlwriter->writeAttribute('xmlns', $value);
 
@@ -332,10 +332,10 @@ class BinaryXml
                     $char = chr(85 + ord($content{$pos}));
                     $pos += 1;
 
-                    $name = self::getDictionaryString($content, $pos);
-                    $value = self::getTextRecord($content, $pos);
+                    $name = self::readDictionaryString($content, $pos);
+                    $value = self::readTextRecord($content, $pos);
 
-                    $xmlwriter->writeAttribute($char.':str'.$name, $value);
+                    $xmlwriter->writeAttribute($char.':'.$name, $value);
                 break;
                 case self::RECORD_TYPE_PREFIX_ATTRIBUTE_A:
                 case self::RECORD_TYPE_PREFIX_ATTRIBUTE_B:
@@ -366,36 +366,36 @@ class BinaryXml
                     $char = chr(59 + ord($content{$pos}));
                     $pos += 1;
 
-                    $name = self::getString($content, $pos);
-                    $value = self::getTextRecord($content, $pos);
+                    $name = self::readString($content, $pos);
+                    $value = self::readTextRecord($content, $pos);
 
                     $xmlwriter->writeAttribute($char.':'.$name, $value);
                 break;
                 case self::RECORD_TYPE_SHORT_ELEMENT:
                     $pos += 1;
 
-                    $name = self::getString($content, $pos);
+                    $name = self::readString($content, $pos);
                     $xmlwriter->startElement($name);
                 break;
                 case self::RECORD_TYPE_ELEMENT:
                     $pos += 1;
 
-                    $prefix = self::getString($content, $pos);
-                    $name = self::getString($content, $pos);
+                    $prefix = self::readString($content, $pos);
+                    $name = self::readString($content, $pos);
                     $xmlwriter->startElement($prefix.':'.$name);
                 break;
                 case self::RECORD_TYPE_SHORT_DICTIONARY_ELEMENT:
                     $pos += 1;
 
-                    $name = self::getDictionaryString($content, $pos);
-                    $xmlwriter->startElement('str'.$name);
+                    $name = self::readDictionaryString($content, $pos);
+                    $xmlwriter->startElement($name);
                 break;
                 case self::RECORD_TYPE_DICTIONARY_ELEMENT:
                     $pos += 1;
 
-                    $prefix = self::getString($content, $pos);
-                    $name = self::getDictionaryString($content, $pos);
-                    $xmlwriter->startElement($prefix.':str'.$name);
+                    $prefix = self::readString($content, $pos);
+                    $name = self::readDictionaryString($content, $pos);
+                    $xmlwriter->startElement($prefix.':'.$name);
                 break;
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_A:
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_B:
@@ -426,9 +426,9 @@ class BinaryXml
                     $char = chr(29 + ord($content{$pos}));
                     $pos += 1;
 
-                    $name = self::getDictionaryString($content, $pos);
+                    $name = self::readDictionaryString($content, $pos);
 
-                    $xmlwriter->startElement($char.':str'.$name);
+                    $xmlwriter->startElement($char.':'.$name);
                 break;
                 case self::RECORD_TYPE_PREFIX_ELEMENT_A:
                 case self::RECORD_TYPE_PREFIX_ELEMENT_B:
@@ -459,7 +459,7 @@ class BinaryXml
                     $char = chr(3 + ord($content{$pos}));
                     $pos += 1;
 
-                    $name = self::getString($content, $pos);
+                    $name = self::readString($content, $pos);
 
                     $xmlwriter->startElement($char.':'.$name);
                 break;
@@ -492,7 +492,7 @@ class BinaryXml
                 case self::RECORD_TYPE_UNICODECHARS16_TEXT:
                 case self::RECORD_TYPE_UNICODECHARS32_TEXT:
                 case self::RECORD_TYPE_QNAMEDICTIONARY_TEXT:
-                    $record = self::getTextRecord($content, $pos);
+                    $record = self::readTextRecord($content, $pos);
 
                     $xmlwriter->text($record);
                 break;
@@ -525,7 +525,7 @@ class BinaryXml
                 case self::RECORD_TYPE_UNICODECHARS16_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_UNICODECHARS32_TEXT_WITH_END_ELEMENT:
                 case self::RECORD_TYPE_QNAMEDICTIONARY_TEXT_WITH_END_ELEMENT:
-                    $record = self::getTextRecord($content, $pos);
+                    $record = self::readTextRecord($content, $pos);
 
                     $xmlwriter->text($record);
                     $xmlwriter->fullEndElement();
@@ -539,55 +539,36 @@ class BinaryXml
         return $xmlwriter->flush(true);
     }
 
-    protected static function getDictionaryString(&$content, &$pos)
+    protected static function readMultiByteInt31(&$content, &$pos)
     {
-        $part_a = ord($content{$pos});
-        $value_a = substr(str_pad(decbin($part_a), 8, '0', STR_PAD_LEFT), 1, 7);
-        if ($part_a <= 0x7F) {
-            $pos += 1;
-
-            return bindec($value_a);
+        $start = $pos;
+        $value = 0;
+        $last = 0x80;
+        for ($i = 0; $i < 4 && ($last & 0x80); $i++) {
+            $last = ord($content{$pos});
+            $value += ($last & 0x7f) << ($i * 7);
+            $pos++;
+        }
+        if ($i == 4 && $last & 0x80) {
+            $last = ord($content{$pos});
+            if (($last & 0x7) !== $last) {
+                throw new BinaryXml\Exception(sprintf('Invalid MultiByteInt31 at position %d.', $start));
+            }
+            $value += ($last & 0x7) << 28;
+            $pos++;
         }
 
-        $part_b = ord($content{$pos + 1});
-        $value_b = substr(str_pad(decbin($part_b), 8, '0', STR_PAD_LEFT), 1, 7);
-        if ($part_b <= 0x7F) {
-            $pos += 2;
-
-            return bindec($value_b.$value_a);
-        }
-
-        $part_c = ord($content{$pos + 2});
-        $value_c = substr(str_pad(decbin($part_c), 8, '0', STR_PAD_LEFT), 1, 7);
-        if ($part_c <= 0x7F) {
-            $pos += 3;
-
-            return bindec($value_c.$value_b.$value_a);
-        }
-
-        $part_d = ord($content{$pos + 3});
-        $value_d = substr(str_pad(decbin($part_d), 8, '0', STR_PAD_LEFT), 1, 7);
-        if ($part_d <= 0x7F) {
-            $pos += 4;
-
-            return bindec($value_d.$value_c.$value_b.$value_a);
-        }
-
-        $part_e = ord($content{$pos + 4});
-        $value_e = substr(str_pad(decbin($part_e), 8, '0', STR_PAD_LEFT), 1, 7);
-        if ($part_e <= 0x7F) {
-            $pos += 5;
-
-            return bindec($value_e.$value_d.$value_c.$value_b.$value_a);
-        }
-
-        throw new BinaryXml\Exception('Unallowed multibyte int');
+        return $value;
     }
 
-    protected static function getString(&$content, &$pos)
+    protected static function readDictionaryString(&$content, &$pos)
     {
-        $record_length = ord($content{$pos});
-        $pos += 1;
+        return sprintf('str%d', self::readMultiByteInt31($content, $pos));
+    }
+
+    protected static function readString(&$content, &$pos)
+    {
+        $record_length = self::readMultiByteInt31($content, $pos);
 
         $record = substr($content, $pos, $record_length);
         $pos += $record_length;
@@ -595,15 +576,15 @@ class BinaryXml
         return $record;
     }
 
-    protected static function getTextRecord(&$content, &$pos)
+    protected static function readTextRecord(&$content, &$pos)
     {
         $record_type = ord($content{$pos});
         $pos += 1;
 
-        return self::getTextRecordInner($content, $pos, $record_type);
+        return self::readTextRecordInner($content, $pos, $record_type);
     }
 
-    protected static function getTextRecordInner(&$content, &$pos, $record_type)
+    protected static function readTextRecordInner(&$content, &$pos, $record_type)
     {
         switch ($record_type) {
             case self::RECORD_TYPE_ZERO_TEXT:
@@ -829,7 +810,7 @@ class BinaryXml
                     if ($record !== '') {
                         $record .= ' ';
                     }
-                    $record .= self::getTextRecord($content, $pos);
+                    $record .= self::readTextRecord($content, $pos);
                 }
 
                 $pos += 1; // skip 1 for end list
@@ -842,7 +823,7 @@ class BinaryXml
             break;
             case self::RECORD_TYPE_DICTIONARY_TEXT:
             case self::RECORD_TYPE_DICTIONARY_TEXT_WITH_END_ELEMENT:
-                return 'str'.self::getDictionaryString($content, $pos);
+                return self::readDictionaryString($content, $pos);
             break;
             case self::RECORD_TYPE_UNIQUEID_TEXT:
             case self::RECORD_TYPE_UNIQUEID_TEXT_WITH_END_ELEMENT:
@@ -993,9 +974,9 @@ class BinaryXml
                 $prefix = chr(97 + ord($content{$pos}));
                 $pos += 1;
 
-                $name = self::getDictionaryString($content, $pos);
+                $name = self::readDictionaryString($content, $pos);
 
-                return $prefix.':str'.$name;
+                return $prefix.':'.$name;
             break;
             default:
                 throw new BinaryXml\Exception('Unknown value type <'.dechex($record_type).'> on pos <'.$pos.'>');
