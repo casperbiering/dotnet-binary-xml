@@ -1,19 +1,28 @@
-This is a PHP implementation of .NET Binary Format: XML Data Structure (MC-NBFX).
+# dotnet-binary-xml
 
-The official specification can be found at:
-http://msdn.microsoft.com/en-us/library/cc219210(PROT.10).aspx
+[![Build Status](https://travis-ci.org/casperbiering/dotnet-binary-xml.png?branch=master)](https://travis-ci.org/casperbiering/dotnet-binary-xml)
 
-Requirements:
+**dotnet-binary-xml** is a PHP implementation of the [.NET Binary Format: XML Data Structure (MC-NBFX)](http://msdn.microsoft.com/en-us/library/cc219210.aspx).
+
+
+## Installation
+
+Just install [Composer](http://getcomposer.org) and run `composer require casperbiering/dotnet-binary-xml` in your project directory.
+
+### Requirements
+
 * XMLWriter (PHP extension)
 * MBString (PHP extension)
 * GMP (PHP extension)
 
-Known/Missing issues:
+
+## Known/Missing Issues
+
 * only decoding is supported
 * timespan not implemented
 * local timezone offset in datetime
 
-Specification inconsistencies:
+### Specification Inconsistencies
 
 1) http://msdn.microsoft.com/en-us/library/cc219251(v=PROT.10).aspx says that
 "If the hour, minutes, seconds, and fraction of second parts are zero, the date MUST
@@ -24,3 +33,7 @@ match the examples.
 UnicodeChars32TextRecord MUST be encoded using MultiByteInt31. That does not
 match the examples.
 
+
+## License
+
+MIT
