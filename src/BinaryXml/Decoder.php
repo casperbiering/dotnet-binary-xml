@@ -14,6 +14,7 @@ class Decoder
     {
         $this->options = array_merge(array(
             'indent' => false,
+            'dictionary' => array(),
         ), $options);
     }
 
@@ -401,7 +402,9 @@ class Decoder
 
     protected function readDictionaryString(&$content, &$pos)
     {
-        return sprintf('str%d', $this->readMultiByteInt31($content, $pos));
+        $index = $this->readMultiByteInt31($content, $pos);
+
+        return $this->getDictionaryString($index);
     }
 
     protected function readString(&$content, &$pos)
@@ -823,5 +826,18 @@ class Decoder
                 throw new DecodingException(sprintf('Unknown record type 0x%02X at position %d.', $recordType, $pos));
             break;
         }
+    }
+
+    protected function getDictionaryString($index)
+    {
+        if (is_string($this->options['dictionary'])) {
+            return sprintf($this->options['dictionary'], $index);
+        }
+
+        if (!isset($this->options['dictionary'][$index])) {
+            throw new DecodingException(sprintf('Invalid DictionaryString 0x%X.', $index));
+        }
+
+        return $this->options['dictionary'][$index];
     }
 }

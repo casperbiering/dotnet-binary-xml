@@ -17,6 +17,30 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testDictionary()
+    {
+        $binary = $this->convertToBinary('42 40 01');
+        $expected = '<test></test>';
+
+        $decoder = new Decoder(array('dictionary' => array(0x40 => 'test')));
+        $actual = $decoder->decode($binary);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Invalid DictionaryString 0x40.
+     */
+    public function testInvalidDictionaryString()
+    {
+        $binary = $this->convertToBinary('42 40 01');
+        $expected = '<test></test>';
+
+        $decoder = new Decoder(array('dictionary' => array()));
+        $decoder->decode($binary);
+    }
+
     /**
      * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
      */
@@ -80,7 +104,7 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
     public function testSpecExample($hexcodes, $expected)
     {
         $binary = $this->convertToBinary($hexcodes);
-        $decoder = new Decoder();
+        $decoder = new Decoder(array('dictionary' => 'str%d'));
 
         $actual = $decoder->decode($binary);
 
