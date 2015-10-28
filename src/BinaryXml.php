@@ -285,7 +285,7 @@ class BinaryXml
 
                     $xmlwriter->writeAttribute('xmlns', $value);
 
-                    break;
+                break;
                 case self::RECORD_TYPE_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
@@ -294,13 +294,22 @@ class BinaryXml
 
                     $xmlwriter->writeAttribute('xmlns:'.$name, $value);
 
-                    break;
+                break;
                 case self::RECORD_TYPE_SHORT_DICTIONARY_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
                     $value = self::readDictionaryString($content, $pos);
 
                     $xmlwriter->writeAttribute('xmlns', $value);
+
+                break;
+                case self::RECORD_TYPE_DICTIONARY_XMLNS_ATTRIBUTE:
+                    $pos += 1;
+
+                    $name = self::readString($content, $pos);
+                    $value = self::readDictionaryString($content, $pos);
+
+                    $xmlwriter->writeAttribute('xmlns:'.$name, $value);
 
                 break;
                 case self::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_A:
