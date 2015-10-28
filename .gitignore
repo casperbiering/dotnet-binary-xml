@@ -1,3 +1,6 @@
-/nbproject/
 *~
+/composer.lock
 /*.komodoproject
+/nbproject/
+/phpunit.xml
+/vendor/
