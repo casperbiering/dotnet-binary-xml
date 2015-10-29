@@ -14,6 +14,6 @@ class SoapDecoderTest extends \PHPUnit_Framework_TestCase
 
         $actual = $decoder->decode($binary);
 
-        $this->assertXmlStringEqualsXmlString($actual, $expected);
+        $this->assertXmlStringEqualsXmlString($expected, $actual);
     }
 }
