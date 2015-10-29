@@ -1,22 +1,112 @@
 <?php
 
-namespace CasperBiering\Dotnet\Tests;
+namespace CasperBiering\Dotnet\Tests\BinaryXml;
 
-use CasperBiering\Dotnet\BinaryXml;
+use CasperBiering\Dotnet\BinaryXml\Decoder;
 
-class BinaryXmlTest extends \PHPUnit_Framework_TestCase
+class DecoderTest extends \PHPUnit_Framework_TestCase
 {
+    public function testIndent()
+    {
+        $binary = $this->convertToBinary('40 03 64 6F 63 40 03 61 62 63 01 01');
+        $expected = "<doc>\n <abc></abc>\n</doc>\n";
+
+        $decoder = new Decoder(array('indent' => true));
+        $actual = $decoder->decode($binary);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testDictionary()
+    {
+        $binary = $this->convertToBinary('42 40 01');
+        $expected = '<test></test>';
+
+        $decoder = new Decoder(array('dictionary' => array(0x40 => 'test')));
+        $actual = $decoder->decode($binary);
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Invalid DictionaryString 0x40.
+     */
+    public function testInvalidDictionaryString()
+    {
+        $binary = $this->convertToBinary('42 40 01');
+        $expected = '<test></test>';
+
+        $decoder = new Decoder(array('dictionary' => array()));
+        $decoder->decode($binary);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     */
+    public function testEmpty()
+    {
+        $decoder = new Decoder();
+        $decoder->decode('');
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Invalid MultiByteInt31 at position 1.
+     */
+    public function testInvalidMultiByteInt31()
+    {
+        $binary = $this->convertToBinary('40 80 80 80 80 80');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Unknown record type 0xF0 at position 3.
+     */
+    public function testInvalidRecordType()
+    {
+        $binary = $this->convertToBinary('40 01 61 F0 F1 F2');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Unknown record type 0xF0 at position 7.
+     */
+    public function testInvalidArrayElementRecordType()
+    {
+        $binary = $this->convertToBinary('03 40 01 61 01 F0 F1 F2');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
+    /**
+     * @expectedException \CasperBiering\Dotnet\BinaryXml\DecodingException
+     * @expectedExceptionMessage Unknown boolean value 0xF0 at position 5.
+     */
+    public function testInvalidBoolean()
+    {
+        $binary = $this->convertToBinary('40 01 61 B5 F0');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
     /**
      * @dataProvider specExamples
      */
     public function testSpecExample($hexcodes, $expected)
     {
-        $binary = '';
-        foreach (explode(' ', trim($hexcodes)) as $code) {
-            $binary .= pack('H*', $code);
-        }
+        $binary = $this->convertToBinary($hexcodes);
+        $decoder = new Decoder(array('dictionary' => 'str%d'));
 
-        $actual = BinaryXml::decode($binary);
+        $actual = $decoder->decode($binary);
 
         $this->assertEquals($expected, $actual);
     }
@@ -103,10 +193,15 @@ class BinaryXmlTest extends \PHPUnit_Framework_TestCase
             array('42 9A 01 B3 FE FF FF FF FF FF FF FF', '<str154>18446744073709551614</str154>'),
             array('40 03 64 6F 63 AC 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF 01', '<doc>urn:uuid:33221100-5544-7766-8899-aabbccddeeff</doc>'),
             array('42 1A AD 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF', '<str26>urn:uuid:33221100-5544-7766-8899-aabbccddeeff</str26>'),
-            //array('40 03 64 6F 63 AE 00 C4 F5 32 FF FF FF FF 01', '<doc>-PT5M44S</doc>'),
-            //array('42 94 07 AF 00 B0 8E F0 1B 00 00 00', '<str916>PT3H20M</str916>'),
+            array('40 03 64 6F 63 AE 00 C4 F5 32 FF FF FF FF 01', '<doc>-PT5M44S</doc>'),
+            array('42 94 07 AF 00 B0 8E F0 1B 00 00 00', '<str916>PT3H20M</str916>'),
             array('40 03 64 6F 63 B0 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 01', '<doc>03020100-0504-0706-0809-0a0b0c0d0e0f</doc>'),
             array('40 02 49 44 B1 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F', '<ID>03020100-0504-0706-0809-0a0b0c0d0e0f</ID>'),
         );
+    }
+
+    private function convertToBinary($hexString)
+    {
+        return pack('H*', preg_replace('/\s+/', '', $hexString));
     }
 }
