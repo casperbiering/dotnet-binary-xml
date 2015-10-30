@@ -9,7 +9,7 @@
 
 Just install [Composer](http://getcomposer.org) and run `composer require casperbiering/dotnet-binary-xml` in your project directory.
 
-### Requirements
+## Requirements
 
 * XMLWriter (PHP extension)
 * MBString (PHP extension)
@@ -21,17 +21,12 @@ Just install [Composer](http://getcomposer.org) and run `composer require casper
 * only decoding is supported
 * local timezone offset in datetime
 
-### Specification Inconsistencies
+## Specification Inconsistencies
 
-1) http://msdn.microsoft.com/en-us/library/cc219251(v=PROT.10).aspx says that
-"If the hour, minutes, seconds, and fraction of second parts are zero, the date MUST
-be interpreted as the following characters. yyyy-MM-dd". That does not
-match the examples.
+* [Spec](http://msdn.microsoft.com/en-us/library/cc219251(v=PROT.10).aspx) says that "If the hour, minutes, seconds, and fraction of second parts are zero, the date MUST be interpreted as the following characters. yyyy-MM-dd". That does not match the [examples](https://msdn.microsoft.com/en-us/library/cc219284.aspx).
 
-2) http://msdn.microsoft.com/en-us/library/cc219270(v=PROT.10).aspx says that
-UnicodeChars32TextRecord MUST be encoded using MultiByteInt31. That does not
-match the examples.
-
+* [Spec](http://msdn.microsoft.com/en-us/library/cc219270(v=PROT.10).aspx) says that UnicodeChars32TextRecord MUST be encoded using MultiByteInt31. That does not
+match the [examples](https://msdn.microsoft.com/en-us/library/cc219284.aspx).
 
 ## License
 
