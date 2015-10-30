@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing">
+  <s:Header>
+    <a:Action s:mustUnderstand="1">http://www.exampleinc.com/ExampleInc.NET/Client/ExampleInc.NET.Client/GetAppleInfo</a:Action>
+    <a:MessageID>urn:uuid:a00753b3-333c-2a74-9ccf-c43111e2990d</a:MessageID>
+    <a:ReplyTo>
+      <a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address>
+    </a:ReplyTo>
+    <PieInfoHeader xmlns="http://www.exampleinc.com/ExampleInc.NET/Client" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+      <PieInfoDetail xmlns:b="http://schemas.datacontract.org/2004/07/ExampleInc.NET.DTO">
+        <b:ClientId>0</b:ClientId>
+        <b:TimestampTo>0001-01-01T00:00:00.0</b:TimestampTo>
+        <b:DataPath />
+        <b:ExpireOn>0001-01-01T00:00:00.0</b:ExpireOn>
+        <b:Id>550e8400-e29b-11d4-a716-446655440000</b:Id>
+      </PieInfoDetail>
+    </PieInfoHeader>
+    <a:To s:mustUnderstand="1">http://www.exampleinc.com/api/service.svc</a:To>
+  </s:Header>
+  <s:Body>
+    <GetAppleInfo xmlns="http://www.exampleinc.com/ExampleInc.NET/Client" />
+  </s:Body>
+</s:Envelope>
