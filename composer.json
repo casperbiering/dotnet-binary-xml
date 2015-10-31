@@ -1,8 +1,9 @@
 {
     "name": "casperbiering/dotnet-binary-xml",
-    "description": "Parsing of .NET Binary Format",
+    "description": "Parsing and writing of .NET Binary Format",
     "require": {
         "php": ">=5.3",
+        "ext-xmlreader": "*",
         "ext-xmlwriter": "*",
         "ext-gmp": "*",
         "ext-mbstring": "*"

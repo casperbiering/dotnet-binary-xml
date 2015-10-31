@@ -11,6 +11,7 @@ Just install [Composer](http://getcomposer.org) and run `composer require casper
 
 ## Requirements
 
+* XMLReader (PHP extension)
 * XMLWriter (PHP extension)
 * MBString (PHP extension)
 * GMP (PHP extension)
@@ -18,7 +19,7 @@ Just install [Composer](http://getcomposer.org) and run `composer require casper
 
 ## Known/Missing Issues
 
-* only decoding is supported
+* encoded output is not optimized
 * local timezone offset in datetime
 
 ## Specification Inconsistencies
