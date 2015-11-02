@@ -99,9 +99,9 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider specExamples
+     * @dataProvider samples
      */
-    public function testSpecExample($hexcodes, $expected)
+    public function testSamples($hexcodes, $expected)
     {
         $binary = $this->convertToBinary($hexcodes);
         $decoder = new Decoder(array('dictionary' => 'str%d'));
@@ -111,7 +111,7 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function specExamples()
+    public function samples()
     {
         return array(
             array('40 03 64 6F 63 01', '<doc></doc>'),
