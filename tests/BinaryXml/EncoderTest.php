@@ -40,6 +40,28 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @expectedException CasperBiering\Dotnet\BinaryXml\EncodingException
+     * @expectedExceptionMessage XML Parsing Error "Extra content at the end of the document".
+     */
+    public function testUnsupportedOnlyComment()
+    {
+        $encoder = new Encoder();
+
+        $encoder->encode('<!--comment-->');
+    }
+
+    /**
+     * @expectedException CasperBiering\Dotnet\BinaryXml\EncodingException
+     * @expectedExceptionMessage XML Parsing Error "Extra content at the end of the document".
+     */
+    public function testUnsupportedMultipleRoots()
+    {
+        $encoder = new Encoder();
+
+        $encoder->encode('<arr>13107</arr><arr>-30584</arr><arr>-8739</arr>');
+    }
+
+    /**
      * @dataProvider samples
      */
     public function testSamples($xml, $expectedHex)

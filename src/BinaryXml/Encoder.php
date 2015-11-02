@@ -38,11 +38,12 @@ class Encoder
             return '';
         }
 
+        libxml_clear_errors();
         $reader = new XMLReader();
         $reader->xml($xml);
 
         $binary = '';
-        while ($reader->read()) {
+        while (@$reader->read()) {
             switch ($reader->nodeType) {
                 case XMLReader::NONE:
                     break;
@@ -108,6 +109,11 @@ class Encoder
                 default:
                     throw new EncodingException(sprintf('Unsupported XML node type %d.', $reader->nodeType));
             }
+        }
+
+        $last_error = libxml_get_last_error();
+        if ($last_error !== FALSE) {
+            throw new EncodingException(sprintf('XML Parsing Error "%s".', rtrim($last_error->message)));
         }
 
         return $binary;
