@@ -2,6 +2,8 @@
 
 namespace CasperBiering\Dotnet\BinaryXml;
 
+use XMLReader;
+
 /**
  * Binary XML encoder.
  */
@@ -36,16 +38,16 @@ class Encoder
             return '';
         }
 
-        $binary = '';
-        $reader = new \XMLReader();
+        $reader = new XMLReader();
         $reader->xml($xml);
 
+        $binary = '';
         while ($reader->read()) {
             switch ($reader->nodeType) {
-                case \XMLReader::NONE:
+                case XMLReader::NONE:
                     break;
 
-                case \XMLReader::ELEMENT:
+                case XMLReader::ELEMENT:
                     $index = $this->getDictionaryIndex($reader->localName);
                     if ($reader->prefix && $index !== false) {
                         $binary .= chr(Constants::RECORD_TYPE_DICTIONARY_ELEMENT);
@@ -69,40 +71,40 @@ class Encoder
                     }
                     break;
 
-                case \XMLReader::TEXT:
+                case XMLReader::TEXT:
                     $this->writeTextRecord($binary, $reader->value);
                     break;
 
-                case \XMLReader::COMMENT:
+                case XMLReader::COMMENT:
                     $binary .= chr(Constants::RECORD_TYPE_COMMENT);
                     $this->writeString($binary, $reader->value);
                     break;
 
-                case \XMLReader::WHITESPACE:
+                case XMLReader::WHITESPACE:
                     break;
 
-                case \XMLReader::SIGNIFICANT_WHITESPACE:
+                case XMLReader::SIGNIFICANT_WHITESPACE:
                     $this->writeTextRecord($binary, $reader->value);
                     break;
 
-                case \XMLReader::END_ELEMENT:
+                case XMLReader::END_ELEMENT:
                     // TODO: Use *_WITH_END_ELEMENT if possible
                     $binary .= chr(Constants::RECORD_TYPE_END_ELEMENT);
                     break;
 
-                case \XMLReader::ATTRIBUTE:
+                case XMLReader::ATTRIBUTE:
                     throw new EncodingException('Invalid encoding state.');
 
-                case \XMLReader::DOC:
-                case \XMLReader::DOC_TYPE:
-                case \XMLReader::DOC_FRAGMENT:
-                case \XMLReader::NOTATION:
-                case \XMLReader::XML_DECLARATION:
-                case \XMLReader::CDATA:
-                case \XMLReader::ENTITY:
-                case \XMLReader::ENTITY_REF:
-                case \XMLReader::END_ENTITY:
-                case \XMLReader::PI:
+                case XMLReader::DOC:
+                case XMLReader::DOC_TYPE:
+                case XMLReader::DOC_FRAGMENT:
+                case XMLReader::NOTATION:
+                case XMLReader::XML_DECLARATION:
+                case XMLReader::CDATA:
+                case XMLReader::ENTITY:
+                case XMLReader::ENTITY_REF:
+                case XMLReader::END_ENTITY:
+                case XMLReader::PI:
                 default:
                     throw new EncodingException(sprintf('Unsupported XML node type %d.', $reader->nodeType));
             }
@@ -111,7 +113,7 @@ class Encoder
         return $binary;
     }
 
-    protected function writeAttributes(&$binary, \XMLReader $reader)
+    protected function writeAttributes(&$binary, XMLReader $reader)
     {
         if (!$reader->hasAttributes) {
             return;
