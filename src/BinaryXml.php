@@ -3,6 +3,7 @@
 namespace CasperBiering\Dotnet;
 
 use CasperBiering\Dotnet\BinaryXml\Decoder;
+use CasperBiering\Dotnet\BinaryXml\Encoder;
 
 class BinaryXml
 {
@@ -14,5 +15,12 @@ class BinaryXml
         ));
 
         return $decoder->decode($content);
+    }
+
+    public static function encode($content)
+    {
+        $encoder = new Encoder();
+
+        return $encoder->encode($content);
     }
 }
