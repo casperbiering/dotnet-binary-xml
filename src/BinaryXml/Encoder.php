@@ -28,9 +28,9 @@ class Encoder
      *
      * @param string $xml The XML document
      *
-     * @return string
-     *
      * @throws EncodingException if the message can not be encoded
+     *
+     * @return string
      */
     public function encode($xml)
     {
@@ -112,7 +112,7 @@ class Encoder
         }
 
         $last_error = libxml_get_last_error();
-        if ($last_error !== FALSE) {
+        if ($last_error !== false) {
             throw new EncodingException(sprintf('XML Parsing Error "%s".', rtrim($last_error->message)));
         }
 
@@ -223,6 +223,7 @@ class Encoder
 
         if ($number == 0) {
             $binary .= chr(0);
+
             return;
         }
 

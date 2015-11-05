@@ -2,9 +2,9 @@
 
 namespace CasperBiering\Dotnet\BinaryXml;
 
-use XMLWriter;
 use DateTime;
 use DateTimeZone;
+use XMLWriter;
 
 class Decoder
 {
