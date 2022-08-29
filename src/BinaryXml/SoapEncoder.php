@@ -7,10 +7,10 @@ namespace CasperBiering\Dotnet\BinaryXml;
  */
 class SoapEncoder extends Encoder
 {
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
-        parent::__construct(array_merge(array(
+        parent::__construct(array_merge([
             'dictionary' => SoapConstants::buildDictionary(),
-        ), $options));
+        ], $options));
     }
 }

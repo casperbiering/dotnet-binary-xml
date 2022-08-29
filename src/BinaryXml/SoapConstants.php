@@ -4,7 +4,7 @@ namespace CasperBiering\Dotnet\BinaryXml;
 
 class SoapConstants
 {
-    private static $strings = array(
+    private static $strings = [
         'mustUnderstand',
         'Envelope',
         'http://www.w3.org/2003/05/soap-envelope',
@@ -492,11 +492,11 @@ class SoapConstants
         'faultstring',
         'faultactor',
         'detail',
-    );
+    ];
 
     public static function buildDictionary()
     {
-        $result = array();
+        $result = [];
         foreach (self::$strings as $string) {
             $result[] = $string;
             $result[] = null;

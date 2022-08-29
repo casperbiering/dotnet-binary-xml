@@ -10,12 +10,12 @@ class Decoder
 {
     private $options;
 
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
-        $this->options = array_merge(array(
-            'indent' => false,
-            'dictionary' => array(),
-        ), $options);
+        $this->options = array_merge([
+            'indent'     => false,
+            'dictionary' => [],
+        ], $options);
     }
 
     public function decode($content)
@@ -64,7 +64,7 @@ class Decoder
                     $pos += 1;
 
                     // Entries
-                    for ($entry = 0; $entry < $length; ++$entry) {
+                    for ($entry = 0; $entry < $length; $entry++) {
                         $value = $this->readTextRecordInner($content, $pos, $recordType);
                         $writer->writeElement($element, $value);
                     }
@@ -385,7 +385,7 @@ class Decoder
         $last = 0x80;
         for ($i = 0; $i < 4 && ($last & 0x80); $i++) {
             $last = ord($content[$pos]);
-            $value += ($last & 0x7f) << ($i * 7);
+            $value += ($last & 0x7F) << ($i * 7);
             $pos++;
         }
         if ($i == 4 && $last & 0x80) {
@@ -526,7 +526,7 @@ class Decoder
                     $record = substr($record, 0, strlen($record) - $scale).'.'.substr($record, $scale * -1);
 
                     $record = trim($record, '0');
-                    if ($record{0} == '.') {
+                    if ($record[0] == '.') {
                         $record = '0'.$record;
                     }
                 }
@@ -546,8 +546,8 @@ class Decoder
                 }
 
                 $binary = '';
-                for ($i = 0; $i < 8; ++$i) {
-                    list(, $byteint) = unpack('C*', $content{$pos + $i});
+                for ($i = 0; $i < 8; $i++) {
+                    list(, $byteint) = unpack('C*', $content[$pos + $i]);
                     $binary = sprintf('%08b', $byteint).$binary;
                 }
                 $pos += 8;
@@ -706,7 +706,7 @@ class Decoder
 
                 $value = '';
                 for ($i = 0; $i < 8; $i++) {
-                    list(, $byte) = unpack('C*', $content{$pos + $i});
+                    list(, $byte) = unpack('C*', $content[$pos + $i]);
                     $value = sprintf('%08b', $byte).$value;
                 }
                 $pos += 8;
@@ -781,6 +781,7 @@ class Decoder
                         return 'true';
                     break;
                 }
+
                 throw new DecodingException(sprintf('Unknown boolean value 0x%02X at position %d.', $record, $pos));
             break;
             case Constants::RECORD_TYPE_UNICODECHARS8_TEXT:
