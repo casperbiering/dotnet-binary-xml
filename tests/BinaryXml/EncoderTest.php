@@ -9,7 +9,7 @@ class EncoderTest extends \PHPUnit\Framework\TestCase
     public function testUnsupportedProcessingInstruction()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
-        $this->expectExceptionMessage("Unsupported XML node type 7.");
+        $this->expectExceptionMessage('Unsupported XML node type 7.');
 
         $encoder = new Encoder();
 
@@ -19,7 +19,7 @@ class EncoderTest extends \PHPUnit\Framework\TestCase
     public function testUnsupportedCdata()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
-        $this->expectExceptionMessage("Unsupported XML node type 4.");
+        $this->expectExceptionMessage('Unsupported XML node type 4.');
 
         $encoder = new Encoder();
 
@@ -29,7 +29,7 @@ class EncoderTest extends \PHPUnit\Framework\TestCase
     public function testUnsupportedDoctype()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
-        $this->expectExceptionMessage("Unsupported XML node type 10.");
+        $this->expectExceptionMessage('Unsupported XML node type 10.');
 
         $encoder = new Encoder();
 
@@ -39,7 +39,7 @@ class EncoderTest extends \PHPUnit\Framework\TestCase
     public function testUnsupportedOnlyComment()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
-        $this->expectExceptionMessage("XML Parsing Error \"Extra content at the end of the document\".");
+        $this->expectExceptionMessage('XML Parsing Error "Extra content at the end of the document".');
 
         $encoder = new Encoder();
 
@@ -49,7 +49,7 @@ class EncoderTest extends \PHPUnit\Framework\TestCase
     public function testUnsupportedMultipleRoots()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
-        $this->expectExceptionMessage("XML Parsing Error \"Extra content at the end of the document\".");
+        $this->expectExceptionMessage('XML Parsing Error "Extra content at the end of the document".');
 
         $encoder = new Encoder();
 
