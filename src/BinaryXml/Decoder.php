@@ -34,7 +34,7 @@ class Decoder
         }
 
         while ($pos < $contentLength) {
-            switch (ord($content{$pos})) {
+            switch (ord($content[$pos])) {
                 case Constants::RECORD_TYPE_END_ELEMENT:
                     $pos += 1;
 
@@ -56,11 +56,11 @@ class Decoder
                     $pos += 1; // expect it to be 0x01
 
                     // Record type
-                    $recordType = ord($content{$pos});
+                    $recordType = ord($content[$pos]);
                     $pos += 1;
 
                     // Length
-                    $length = ord($content{$pos});
+                    $length = ord($content[$pos]);
                     $pos += 1;
 
                     // Entries
@@ -168,7 +168,7 @@ class Decoder
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_X:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_Y:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_Z:
-                    $char = chr(85 + ord($content{$pos}));
+                    $char = chr(85 + ord($content[$pos]));
                     $pos += 1;
 
                     $name = $this->readDictionaryString($content, $pos);
@@ -202,7 +202,7 @@ class Decoder
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_X:
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_Y:
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_Z:
-                    $char = chr(59 + ord($content{$pos}));
+                    $char = chr(59 + ord($content[$pos]));
                     $pos += 1;
 
                     $name = $this->readString($content, $pos);
@@ -262,7 +262,7 @@ class Decoder
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_X:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_Y:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_Z:
-                    $char = chr(29 + ord($content{$pos}));
+                    $char = chr(29 + ord($content[$pos]));
                     $pos += 1;
 
                     $name = $this->readDictionaryString($content, $pos);
@@ -295,7 +295,7 @@ class Decoder
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_X:
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_Y:
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_Z:
-                    $char = chr(3 + ord($content{$pos}));
+                    $char = chr(3 + ord($content[$pos]));
                     $pos += 1;
 
                     $name = $this->readString($content, $pos);
@@ -370,7 +370,7 @@ class Decoder
                     $writer->fullEndElement();
                 break;
                 default:
-                    throw new DecodingException(sprintf('Unknown record type 0x%02X at position %d.', ord($content{$pos}), $pos));
+                    throw new DecodingException(sprintf('Unknown record type 0x%02X at position %d.', ord($content[$pos]), $pos));
                 break;
             }
         }
@@ -384,12 +384,12 @@ class Decoder
         $value = 0;
         $last = 0x80;
         for ($i = 0; $i < 4 && ($last & 0x80); $i++) {
-            $last = ord($content{$pos});
+            $last = ord($content[$pos]);
             $value += ($last & 0x7f) << ($i * 7);
             $pos++;
         }
         if ($i == 4 && $last & 0x80) {
-            $last = ord($content{$pos});
+            $last = ord($content[$pos]);
             if (($last & 0x7) !== $last) {
                 throw new DecodingException(sprintf('Invalid MultiByteInt31 at position %d.', $start));
             }
@@ -419,7 +419,7 @@ class Decoder
 
     protected function readTextRecord(&$content, &$pos)
     {
-        $recordType = ord($content{$pos});
+        $recordType = ord($content[$pos]);
         $pos += 1;
 
         return $this->readTextRecordInner($content, $pos, $recordType);
@@ -446,7 +446,7 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_INT8_TEXT:
             case Constants::RECORD_TYPE_INT8_TEXT_WITH_END_ELEMENT:
-                $record = unpack('c*', $content{$pos});
+                $record = unpack('c*', $content[$pos]);
                 $pos += 1;
 
                 return (string) $record[1];
@@ -500,10 +500,10 @@ class Decoder
 
                 $pos += 2; // First 2 bytes reserved
 
-                $scale = ord($content{$pos});
+                $scale = ord($content[$pos]);
                 $pos += 1;
 
-                $sign = ord($content{$pos});
+                $sign = ord($content[$pos]);
                 $pos += 1;
 
                 list(, $hi32Hex) = unpack('H*', strrev(substr($content, $pos, 4)));
@@ -589,7 +589,7 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_CHARS8_TEXT:
             case Constants::RECORD_TYPE_CHARS8_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('C*', $content{$pos});
+                list(, $recordLength) = unpack('C*', $content[$pos]);
                 $pos += 1;
 
                 $record = substr($content, $pos, $recordLength);
@@ -619,7 +619,7 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_BYTES8_TEXT:
             case Constants::RECORD_TYPE_BYTES8_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('C*', $content{$pos});
+                list(, $recordLength) = unpack('C*', $content[$pos]);
                 $pos += 1;
 
                 $record = substr($content, $pos, $recordLength);
@@ -650,7 +650,7 @@ class Decoder
             case Constants::RECORD_TYPE_START_LIST_TEXT:
 
                 $record = '';
-                while (ord($content{$pos}) != Constants::RECORD_TYPE_END_LIST_TEXT) {
+                while (ord($content[$pos]) != Constants::RECORD_TYPE_END_LIST_TEXT) {
                     if ($record !== '') {
                         $record .= ' ';
                     }
@@ -771,7 +771,7 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_BOOL_TEXT:
             case Constants::RECORD_TYPE_BOOL_TEXT_WITH_END_ELEMENT:
-                $record = ord($content{$pos});
+                $record = ord($content[$pos]);
                 $pos += 1;
                 switch ($record) {
                     case 0:
@@ -785,7 +785,7 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_UNICODECHARS8_TEXT:
             case Constants::RECORD_TYPE_UNICODECHARS8_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('C*', $content{$pos});
+                list(, $recordLength) = unpack('C*', $content[$pos]);
                 $pos += 1;
 
                 $record = substr($content, $pos, $recordLength);
@@ -815,7 +815,7 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_QNAMEDICTIONARY_TEXT:
             case Constants::RECORD_TYPE_QNAMEDICTIONARY_TEXT_WITH_END_ELEMENT:
-                $prefix = chr(97 + ord($content{$pos}));
+                $prefix = chr(97 + ord($content[$pos]));
                 $pos += 1;
 
                 $name = $this->readDictionaryString($content, $pos);
