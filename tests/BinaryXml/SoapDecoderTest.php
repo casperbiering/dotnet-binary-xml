@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CasperBiering\Dotnet\Tests\BinaryXml;
 
 use CasperBiering\Dotnet\BinaryXml\SoapDecoder;
