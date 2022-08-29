@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace CasperBiering\Dotnet\Tests\BinaryXml;
 
@@ -31,7 +33,7 @@ class DecoderTest extends \PHPUnit\Framework\TestCase
     public function testInvalidDictionaryString()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\DecodingException::class);
-        $this->expectExceptionMessage("Invalid DictionaryString 0x40.");
+        $this->expectExceptionMessage('Invalid DictionaryString 0x40.');
 
         $binary = $this->convertToBinary('42 40 01');
         $expected = '<test></test>';
@@ -51,7 +53,7 @@ class DecoderTest extends \PHPUnit\Framework\TestCase
     public function testInvalidMultiByteInt31()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\DecodingException::class);
-        $this->expectExceptionMessage("Invalid MultiByteInt31 at position 1.");
+        $this->expectExceptionMessage('Invalid MultiByteInt31 at position 1.');
 
         $binary = $this->convertToBinary('40 80 80 80 80 80');
         $decoder = new Decoder();
@@ -62,7 +64,7 @@ class DecoderTest extends \PHPUnit\Framework\TestCase
     public function testInvalidRecordType()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\DecodingException::class);
-        $this->expectExceptionMessage("Unknown record type 0xF0 at position 3.");
+        $this->expectExceptionMessage('Unknown record type 0xF0 at position 3.');
 
         $binary = $this->convertToBinary('40 01 61 F0 F1 F2');
         $decoder = new Decoder();
@@ -73,7 +75,7 @@ class DecoderTest extends \PHPUnit\Framework\TestCase
     public function testInvalidArrayElementRecordType()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\DecodingException::class);
-        $this->expectExceptionMessage("Unknown record type 0xF0 at position 7.");
+        $this->expectExceptionMessage('Unknown record type 0xF0 at position 7.');
 
         $binary = $this->convertToBinary('03 40 01 61 01 F0 F1 F2');
         $decoder = new Decoder();
@@ -84,7 +86,7 @@ class DecoderTest extends \PHPUnit\Framework\TestCase
     public function testInvalidBoolean()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\DecodingException::class);
-        $this->expectExceptionMessage("Unknown boolean value 0xF0 at position 5.");
+        $this->expectExceptionMessage('Unknown boolean value 0xF0 at position 5.');
 
         $binary = $this->convertToBinary('40 01 61 B5 F0');
         $decoder = new Decoder();
