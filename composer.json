@@ -2,14 +2,14 @@
     "name": "casperbiering/dotnet-binary-xml",
     "description": "Parsing and writing of .NET Binary Format",
     "require": {
-        "php": ">=5.3",
+        "php": ">=7.3",
         "ext-xmlreader": "*",
         "ext-xmlwriter": "*",
         "ext-gmp": "*",
         "ext-mbstring": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.8"
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CasperBiering\Dotnet\Tests\BinaryXml;
 
 use CasperBiering\Dotnet\BinaryXml\SoapDecoder;
 
-class SoapDecoderTest extends \PHPUnit_Framework_TestCase
+class SoapDecoderTest extends \PHPUnit\Framework\TestCase
 {
     public function testSample()
     {

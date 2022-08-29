@@ -1,61 +1,58 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CasperBiering\Dotnet\Tests\BinaryXml;
 
 use CasperBiering\Dotnet\BinaryXml\Encoder;
 
-class EncoderTest extends \PHPUnit_Framework_TestCase
+class EncoderTest extends \PHPUnit\Framework\TestCase
 {
-    /**
-     * @expectedException CasperBiering\Dotnet\BinaryXml\EncodingException
-     * @expectedExceptionMessage Unsupported XML node type 7.
-     */
     public function testUnsupportedProcessingInstruction()
     {
+        $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
+        $this->expectExceptionMessage('Unsupported XML node type 7.');
+
         $encoder = new Encoder();
 
         $encoder->encode('<?abc?><doc></doc>');
     }
 
-    /**
-     * @expectedException CasperBiering\Dotnet\BinaryXml\EncodingException
-     * @expectedExceptionMessage Unsupported XML node type 4.
-     */
     public function testUnsupportedCdata()
     {
+        $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
+        $this->expectExceptionMessage('Unsupported XML node type 4.');
+
         $encoder = new Encoder();
 
         $encoder->encode('<doc><![CDATA[abc]]></doc>');
     }
 
-    /**
-     * @expectedException CasperBiering\Dotnet\BinaryXml\EncodingException
-     * @expectedExceptionMessage Unsupported XML node type 10.
-     */
     public function testUnsupportedDoctype()
     {
+        $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
+        $this->expectExceptionMessage('Unsupported XML node type 10.');
+
         $encoder = new Encoder();
 
         $encoder->encode('<?xml version="1.0"?><!DOCTYPE foo SYSTEM "./foo.dtd"><doc />');
     }
 
-    /**
-     * @expectedException CasperBiering\Dotnet\BinaryXml\EncodingException
-     * @expectedExceptionMessage XML Parsing Error "Extra content at the end of the document".
-     */
     public function testUnsupportedOnlyComment()
     {
+        $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
+        $this->expectExceptionMessage('XML Parsing Error "Extra content at the end of the document".');
+
         $encoder = new Encoder();
 
         $encoder->encode('<!--comment-->');
     }
 
-    /**
-     * @expectedException CasperBiering\Dotnet\BinaryXml\EncodingException
-     * @expectedExceptionMessage XML Parsing Error "Extra content at the end of the document".
-     */
     public function testUnsupportedMultipleRoots()
     {
+        $this->expectException(\CasperBiering\Dotnet\BinaryXml\EncodingException::class);
+        $this->expectExceptionMessage('XML Parsing Error "Extra content at the end of the document".');
+
         $encoder = new Encoder();
 
         $encoder->encode('<arr>13107</arr><arr>-30584</arr><arr>-8739</arr>');

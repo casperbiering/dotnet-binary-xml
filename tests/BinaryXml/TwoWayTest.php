@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CasperBiering\Dotnet\Tests\BinaryXml;
 
 use CasperBiering\Dotnet\BinaryXml\Decoder;
 use CasperBiering\Dotnet\BinaryXml\Encoder;
 
-class TwoWayTest extends \PHPUnit_Framework_TestCase
+class TwoWayTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @dataProvider samples
