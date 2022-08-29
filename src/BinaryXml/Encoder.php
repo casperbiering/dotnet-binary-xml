@@ -16,11 +16,11 @@ class Encoder
      *
      * @param array $options
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
-        $this->options = array_merge(array(
-            'dictionary' => array(),
-        ), $options);
+        $this->options = array_merge([
+            'dictionary' => [],
+        ], $options);
     }
 
     /**
@@ -95,7 +95,6 @@ class Encoder
 
                 case XMLReader::ATTRIBUTE:
                     throw new EncodingException('Invalid encoding state.');
-
                 case XMLReader::DOC:
                 case XMLReader::DOC_TYPE:
                 case XMLReader::DOC_FRAGMENT:
@@ -199,11 +198,11 @@ class Encoder
         } elseif (($index = $this->getDictionaryIndex($string)) !== false) {
             $binary .= chr(Constants::RECORD_TYPE_DICTIONARY_TEXT);
             $this->writeDictionaryString($binary, $index);
-        } elseif ($length <= 0xff) {
+        } elseif ($length <= 0xFF) {
             $binary .= chr(Constants::RECORD_TYPE_CHARS8_TEXT);
             $binary .= pack('C', $length);
             $binary .= $string;
-        } elseif ($length <= 0xffff) {
+        } elseif ($length <= 0xFFFF) {
             $binary .= chr(Constants::RECORD_TYPE_CHARS16_TEXT);
             $binary .= pack('v', $length);
             $binary .= $string;
@@ -228,7 +227,7 @@ class Encoder
         }
 
         for ($i = 0; $i < 5 && $number > 0; $i++) {
-            $binary .= chr(($number & 0x7f) + ($number > 0x7f ? 0x80 : 0));
+            $binary .= chr(($number & 0x7F) + ($number > 0x7F ? 0x80 : 0));
             $number >>= 7;
         }
     }

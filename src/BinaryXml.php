@@ -9,10 +9,10 @@ class BinaryXml
 {
     public static function decode($content, $indent = false)
     {
-        $decoder = new Decoder(array(
-            'indent' => $indent,
+        $decoder = new Decoder([
+            'indent'     => $indent,
             'dictionary' => 'str%d',
-        ));
+        ]);
 
         return $decoder->decode($content);
     }
