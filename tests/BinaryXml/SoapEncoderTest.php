@@ -4,7 +4,7 @@ namespace CasperBiering\Dotnet\Tests\BinaryXml;
 
 use CasperBiering\Dotnet\BinaryXml\SoapEncoder;
 
-class SoapEncoderTest extends \PHPUnit_Framework_TestCase
+class SoapEncoderTest extends \PHPUnit\Framework\TestCase
 {
     public function testSample()
     {
