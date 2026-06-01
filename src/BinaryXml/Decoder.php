@@ -34,7 +34,8 @@ class Decoder
         }
 
         while ($pos < $contentLength) {
-            switch (ord($content[$pos])) {
+            $currentRecordType = $this->peekByte($content, $pos);
+            switch ($currentRecordType) {
                 case Constants::RECORD_TYPE_END_ELEMENT:
                     $pos += 1;
 
@@ -51,17 +52,15 @@ class Decoder
                     $pos += 1;
 
                     // Element
-                    $pos += 1; // expect it to be 0x40
+                    $this->readByte($content, $pos); // expect it to be 0x40
                     $element = $this->readString($content, $pos);
-                    $pos += 1; // expect it to be 0x01
+                    $this->readByte($content, $pos); // expect it to be 0x01
 
                     // Record type
-                    $recordType = ord($content[$pos]);
-                    $pos += 1;
+                    $recordType = $this->readByte($content, $pos);
 
                     // Length
-                    $length = ord($content[$pos]);
-                    $pos += 1;
+                    $length = $this->readByte($content, $pos);
 
                     // Entries
                     for ($entry = 0; $entry < $length; $entry++) {
@@ -168,8 +167,7 @@ class Decoder
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_X:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_Y:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_Z:
-                    $char = chr(85 + ord($content[$pos]));
-                    $pos += 1;
+                    $char = chr(85 + $this->readByte($content, $pos));
 
                     $name = $this->readDictionaryString($content, $pos);
                     $value = $this->readTextRecord($content, $pos);
@@ -202,8 +200,7 @@ class Decoder
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_X:
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_Y:
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_Z:
-                    $char = chr(59 + ord($content[$pos]));
-                    $pos += 1;
+                    $char = chr(59 + $this->readByte($content, $pos));
 
                     $name = $this->readString($content, $pos);
                     $value = $this->readTextRecord($content, $pos);
@@ -262,8 +259,7 @@ class Decoder
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_X:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_Y:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_Z:
-                    $char = chr(29 + ord($content[$pos]));
-                    $pos += 1;
+                    $char = chr(29 + $this->readByte($content, $pos));
 
                     $name = $this->readDictionaryString($content, $pos);
 
@@ -295,8 +291,7 @@ class Decoder
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_X:
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_Y:
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_Z:
-                    $char = chr(3 + ord($content[$pos]));
-                    $pos += 1;
+                    $char = chr(3 + $this->readByte($content, $pos));
 
                     $name = $this->readString($content, $pos);
 
@@ -370,7 +365,7 @@ class Decoder
                     $writer->fullEndElement();
                 break;
                 default:
-                    throw new DecodingException(sprintf('Unknown record type 0x%02X at position %d.', ord($content[$pos]), $pos));
+                    throw new DecodingException(sprintf('Unknown record type 0x%02X at position %d.', $currentRecordType, $pos));
                 break;
             }
         }
@@ -384,17 +379,15 @@ class Decoder
         $value = 0;
         $last = 0x80;
         for ($i = 0; $i < 4 && ($last & 0x80); $i++) {
-            $last = ord($content[$pos]);
+            $last = $this->readByte($content, $pos);
             $value += ($last & 0x7F) << ($i * 7);
-            $pos++;
         }
         if ($i == 4 && $last & 0x80) {
-            $last = ord($content[$pos]);
+            $last = $this->readByte($content, $pos);
             if (($last & 0x7) !== $last) {
                 throw new DecodingException(sprintf('Invalid MultiByteInt31 at position %d.', $start));
             }
             $value += ($last & 0x7) << 28;
-            $pos++;
         }
 
         return $value;
@@ -411,16 +404,14 @@ class Decoder
     {
         $recordLength = $this->readMultiByteInt31($content, $pos);
 
-        $record = substr($content, $pos, $recordLength);
-        $pos += $recordLength;
+        $record = $this->readBytes($content, $pos, $recordLength);
 
         return $record;
     }
 
     protected function readTextRecord(&$content, &$pos)
     {
-        $recordType = ord($content[$pos]);
-        $pos += 1;
+        $recordType = $this->readByte($content, $pos);
 
         return $this->readTextRecordInner($content, $pos, $recordType);
     }
@@ -446,24 +437,15 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_INT8_TEXT:
             case Constants::RECORD_TYPE_INT8_TEXT_WITH_END_ELEMENT:
-                $record = unpack('c*', $content[$pos]);
-                $pos += 1;
-
-                return (string) $record[1];
+                return (string) $this->readInt8($content, $pos);
             break;
             case Constants::RECORD_TYPE_INT16_TEXT:
             case Constants::RECORD_TYPE_INT16_TEXT_WITH_END_ELEMENT:
-                $record = unpack('s*', substr($content, $pos, 2));
-                $pos += 2;
-
-                return (string) $record[1];
+                return (string) $this->readInt16LE($content, $pos);
             break;
             case Constants::RECORD_TYPE_INT32_TEXT:
             case Constants::RECORD_TYPE_INT32_TEXT_WITH_END_ELEMENT:
-                $record = unpack('l*', substr($content, $pos, 4));
-                $pos += 4;
-
-                return (string) $record[1];
+                return (string) $this->readInt32LE($content, $pos);
             break;
             case Constants::RECORD_TYPE_INT64_TEXT:
             case Constants::RECORD_TYPE_INT64_TEXT_WITH_END_ELEMENT:
@@ -472,22 +454,22 @@ class Decoder
                     throw new DecodingException('Int64 requires GMP extension');
                 }
 
-                list(, $int64Hex) = unpack('H*', strrev(substr($content, $pos, 8)));
-                $pos += 8;
+                $value = $this->readUInt64LE($content, $pos);
+                if (gmp_cmp($value, gmp_pow(2, 63)) >= 0) {
+                    $value = gmp_sub($value, gmp_pow(2, 64));
+                }
 
-                return (string) gmp_strval(gmp_init($int64Hex, 16), 10);
+                return (string) gmp_strval($value, 10);
             break;
             case Constants::RECORD_TYPE_FLOAT_TEXT:
             case Constants::RECORD_TYPE_FLOAT_TEXT_WITH_END_ELEMENT:
-                $record = unpack('f*', substr($content, $pos, 4));
-                $pos += 4;
+                $record = unpack('g', $this->readBytes($content, $pos, 4));
 
                 return (string) $record[1];
             break;
             case Constants::RECORD_TYPE_DOUBLE_TEXT:
             case Constants::RECORD_TYPE_DOUBLE_TEXT_WITH_END_ELEMENT:
-                $record = unpack('d*', substr($content, $pos, 8));
-                $pos += 8;
+                $record = unpack('e', $this->readBytes($content, $pos, 8));
 
                 return (string) $record[1];
             break;
@@ -498,20 +480,16 @@ class Decoder
                     throw new DecodingException('Decimal requires GMP extension');
                 }
 
-                $pos += 2; // First 2 bytes reserved
+                $this->readBytes($content, $pos, 2); // First 2 bytes reserved
 
-                $scale = ord($content[$pos]);
-                $pos += 1;
+                $scale = $this->readByte($content, $pos);
 
-                $sign = ord($content[$pos]);
-                $pos += 1;
+                $sign = $this->readByte($content, $pos);
 
-                list(, $hi32Hex) = unpack('H*', strrev(substr($content, $pos, 4)));
-                $pos += 4;
+                list(, $hi32Hex) = unpack('H*', strrev($this->readBytes($content, $pos, 4)));
                 $hi32 = gmp_init($hi32Hex, 16);
 
-                list(, $lo64Hex) = unpack('H*', strrev(substr($content, $pos, 8)));
-                $pos += 8;
+                list(, $lo64Hex) = unpack('H*', strrev($this->readBytes($content, $pos, 8)));
                 $lo64 = gmp_init($lo64Hex, 16);
 
                 $value = gmp_add(gmp_mul($hi32, gmp_pow(2, 64)), $lo64);
@@ -526,7 +504,7 @@ class Decoder
                     $record = substr($record, 0, strlen($record) - $scale).'.'.substr($record, $scale * -1);
 
                     $record = trim($record, '0');
-                    if ($record[0] == '.') {
+                    if ($record === '' || $record[0] == '.') {
                         $record = '0'.$record;
                     }
                 }
@@ -547,10 +525,9 @@ class Decoder
 
                 $binary = '';
                 for ($i = 0; $i < 8; $i++) {
-                    list(, $byteint) = unpack('C*', $content[$pos + $i]);
+                    list(, $byteint) = unpack('C*', $this->readBytes($content, $pos, 1));
                     $binary = sprintf('%08b', $byteint).$binary;
                 }
-                $pos += 8;
 
                 $value = gmp_init(substr($binary, 2, 62), 2);
 
@@ -570,11 +547,11 @@ class Decoder
 
                 // Join different time elements
                 if ($fraction !== '0000000') {
-                    $record = "${date}T${time}.${fraction}";
+                    $record = "{$date}T{$time}.{$fraction}";
                 } elseif ($time !== '00:00:00') {
-                    $record = "${date}T${time}";
+                    $record = "{$date}T{$time}";
                 } else {
-                    $record = "${date}";
+                    $record = "{$date}";
                 }
 
                 // Add timezone info
@@ -589,68 +566,56 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_CHARS8_TEXT:
             case Constants::RECORD_TYPE_CHARS8_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('C*', $content[$pos]);
-                $pos += 1;
+                $recordLength = $this->readByte($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return $record;
             break;
             case Constants::RECORD_TYPE_CHARS16_TEXT:
             case Constants::RECORD_TYPE_CHARS16_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('S*', substr($content, $pos, 2));
-                $pos += 2;
+                $recordLength = $this->readUInt16LE($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return $record;
             break;
             case Constants::RECORD_TYPE_CHARS32_TEXT:
             case Constants::RECORD_TYPE_CHARS32_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('l*', substr($content, $pos, 4));
-                $pos += 4;
+                $recordLength = $this->readUInt32LE($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return $record;
             break;
             case Constants::RECORD_TYPE_BYTES8_TEXT:
             case Constants::RECORD_TYPE_BYTES8_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('C*', $content[$pos]);
-                $pos += 1;
+                $recordLength = $this->readByte($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return base64_encode($record);
             break;
             case Constants::RECORD_TYPE_BYTES16_TEXT:
             case Constants::RECORD_TYPE_BYTES16_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('S*', substr($content, $pos, 2));
-                $pos += 2;
+                $recordLength = $this->readUInt16LE($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return base64_encode($record);
             break;
             case Constants::RECORD_TYPE_BYTES32_TEXT:
             case Constants::RECORD_TYPE_BYTES32_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('l*', substr($content, $pos, 4));
-                $pos += 4;
+                $recordLength = $this->readUInt32LE($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return base64_encode($record);
             break;
             case Constants::RECORD_TYPE_START_LIST_TEXT:
 
                 $record = '';
-                while (ord($content[$pos]) != Constants::RECORD_TYPE_END_LIST_TEXT) {
+                while ($this->peekByte($content, $pos) != Constants::RECORD_TYPE_END_LIST_TEXT) {
                     if ($record !== '') {
                         $record .= ' ';
                     }
@@ -674,20 +639,15 @@ class Decoder
             case Constants::RECORD_TYPE_UUID_TEXT:
             case Constants::RECORD_TYPE_UUID_TEXT_WITH_END_ELEMENT:
 
-                list(, $data1) = unpack('H*', strrev(substr($content, $pos, 4)));
-                $pos += 4;
+                list(, $data1) = unpack('H*', strrev($this->readBytes($content, $pos, 4)));
 
-                list(, $data2) = unpack('H*', strrev(substr($content, $pos, 2)));
-                $pos += 2;
+                list(, $data2) = unpack('H*', strrev($this->readBytes($content, $pos, 2)));
 
-                list(, $data3) = unpack('H*', strrev(substr($content, $pos, 2)));
-                $pos += 2;
+                list(, $data3) = unpack('H*', strrev($this->readBytes($content, $pos, 2)));
 
-                list(, $data4) = unpack('H*', substr($content, $pos, 2));
-                $pos += 2;
+                list(, $data4) = unpack('H*', $this->readBytes($content, $pos, 2));
 
-                list(, $data5) = unpack('H*', substr($content, $pos, 6));
-                $pos += 6;
+                list(, $data5) = unpack('H*', $this->readBytes($content, $pos, 6));
 
                 $record = "{$data1}-{$data2}-{$data3}-{$data4}-{$data5}";
 
@@ -706,10 +666,9 @@ class Decoder
 
                 $value = '';
                 for ($i = 0; $i < 8; $i++) {
-                    list(, $byte) = unpack('C*', $content[$pos + $i]);
+                    list(, $byte) = unpack('C*', $this->readBytes($content, $pos, 1));
                     $value = sprintf('%08b', $byte).$value;
                 }
-                $pos += 8;
 
                 $value = gmp_init($value, 2);
 
@@ -749,7 +708,7 @@ class Decoder
                     if ($secs > 0 || $fracs > 0) {
                         $record .= $secs;
                         if ($fracs > 0) {
-                            $record .= '.'.$fracs;
+                            $record .= '.'.str_pad((string) $fracs, 7, '0', STR_PAD_LEFT);
                         }
                         $record .= 'S';
                     }
@@ -764,15 +723,11 @@ class Decoder
                     throw new DecodingException('Uint64 requires GMP extension');
                 }
 
-                list(, $uint64Hex) = unpack('H*', strrev(substr($content, $pos, 8)));
-                $pos += 8;
-
-                return (string) gmp_strval(gmp_init($uint64Hex, 16), 10);
+                return (string) gmp_strval($this->readUInt64LE($content, $pos), 10);
             break;
             case Constants::RECORD_TYPE_BOOL_TEXT:
             case Constants::RECORD_TYPE_BOOL_TEXT_WITH_END_ELEMENT:
-                $record = ord($content[$pos]);
-                $pos += 1;
+                $record = $this->readByte($content, $pos);
                 switch ($record) {
                     case 0:
                         return 'false';
@@ -786,38 +741,31 @@ class Decoder
             break;
             case Constants::RECORD_TYPE_UNICODECHARS8_TEXT:
             case Constants::RECORD_TYPE_UNICODECHARS8_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('C*', $content[$pos]);
-                $pos += 1;
+                $recordLength = $this->readByte($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return mb_convert_encoding($record, 'UTF-8', 'UTF-16');
             break;
             case Constants::RECORD_TYPE_UNICODECHARS16_TEXT:
             case Constants::RECORD_TYPE_UNICODECHARS16_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('S*', substr($content, $pos, 2));
-                $pos += 2;
+                $recordLength = $this->readUInt16LE($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return mb_convert_encoding($record, 'UTF-8', 'UTF-16');
             break;
             case Constants::RECORD_TYPE_UNICODECHARS32_TEXT:
             case Constants::RECORD_TYPE_UNICODECHARS32_TEXT_WITH_END_ELEMENT:
-                list(, $recordLength) = unpack('l*', substr($content, $pos, 4));
-                $pos += 4;
+                $recordLength = $this->readUInt32LE($content, $pos);
 
-                $record = substr($content, $pos, $recordLength);
-                $pos += $recordLength;
+                $record = $this->readBytes($content, $pos, $recordLength);
 
                 return mb_convert_encoding($record, 'UTF-8', 'UTF-16');
             break;
             case Constants::RECORD_TYPE_QNAMEDICTIONARY_TEXT:
             case Constants::RECORD_TYPE_QNAMEDICTIONARY_TEXT_WITH_END_ELEMENT:
-                $prefix = chr(97 + ord($content[$pos]));
-                $pos += 1;
+                $prefix = chr(97 + $this->readByte($content, $pos));
 
                 $name = $this->readDictionaryString($content, $pos);
 
@@ -826,6 +774,80 @@ class Decoder
             default:
                 throw new DecodingException(sprintf('Unknown record type 0x%02X at position %d.', $recordType, $pos));
             break;
+        }
+    }
+
+    protected function peekByte(&$content, $pos)
+    {
+        $this->assertAvailable($content, $pos, 1);
+
+        return ord($content[$pos]);
+    }
+
+    protected function readByte(&$content, &$pos)
+    {
+        $byte = $this->peekByte($content, $pos);
+        $pos += 1;
+
+        return $byte;
+    }
+
+    protected function readBytes(&$content, &$pos, $length)
+    {
+        $this->assertAvailable($content, $pos, $length);
+
+        $bytes = substr($content, $pos, $length);
+        $pos += $length;
+
+        return $bytes;
+    }
+
+    protected function readInt8(&$content, &$pos)
+    {
+        $value = $this->readByte($content, $pos);
+
+        return $value >= 0x80 ? $value - 0x100 : $value;
+    }
+
+    protected function readUInt16LE(&$content, &$pos)
+    {
+        $record = unpack('v', $this->readBytes($content, $pos, 2));
+
+        return $record[1];
+    }
+
+    protected function readInt16LE(&$content, &$pos)
+    {
+        $value = $this->readUInt16LE($content, $pos);
+
+        return $value >= 0x8000 ? $value - 0x10000 : $value;
+    }
+
+    protected function readUInt32LE(&$content, &$pos)
+    {
+        $record = unpack('V', $this->readBytes($content, $pos, 4));
+
+        return $record[1];
+    }
+
+    protected function readInt32LE(&$content, &$pos)
+    {
+        $value = $this->readUInt32LE($content, $pos);
+
+        return $value >= 0x80000000 ? $value - 0x100000000 : $value;
+    }
+
+    protected function readUInt64LE(&$content, &$pos)
+    {
+        list(, $hex) = unpack('H*', strrev($this->readBytes($content, $pos, 8)));
+
+        return gmp_init($hex, 16);
+    }
+
+    protected function assertAvailable(&$content, $pos, $length)
+    {
+        if ($length < 0 || $pos < 0 || strlen($content) - $pos < $length) {
+            throw new DecodingException(sprintf('Unexpected end of content at position %d.', $pos));
         }
     }
 

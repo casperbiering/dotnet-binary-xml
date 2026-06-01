@@ -38,79 +38,94 @@ class Encoder
             return '';
         }
 
+        $previousUseInternalErrors = libxml_use_internal_errors(true);
         libxml_clear_errors();
         $reader = new XMLReader();
-        $reader->xml($xml);
+        if (!$reader->xml($xml)) {
+            $last_error = libxml_get_last_error();
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousUseInternalErrors);
 
-        $binary = '';
-        while (@$reader->read()) {
-            switch ($reader->nodeType) {
-                case XMLReader::NONE:
-                    break;
+            $message = $last_error === false ? 'Unknown XML parsing error' : rtrim($last_error->message);
 
-                case XMLReader::ELEMENT:
-                    $index = $this->getDictionaryIndex($reader->localName);
-                    if ($reader->prefix && $index !== false) {
-                        $binary .= chr(Constants::RECORD_TYPE_DICTIONARY_ELEMENT);
-                        $this->writeString($binary, $reader->prefix);
-                        $this->writeDictionaryString($binary, $index);
-                    } elseif ($reader->prefix) {
-                        $binary .= chr(Constants::RECORD_TYPE_ELEMENT);
-                        $this->writeString($binary, $reader->prefix);
-                        $this->writeString($binary, $reader->localName);
-                    } elseif ($index !== false) {
-                        $binary .= chr(Constants::RECORD_TYPE_SHORT_DICTIONARY_ELEMENT);
-                        $this->writeDictionaryString($binary, $index);
-                    } else {
-                        $binary .= chr(Constants::RECORD_TYPE_SHORT_ELEMENT);
-                        $this->writeString($binary, $reader->localName);
-                    }
-                    $emptyElement = $reader->isEmptyElement;
-                    $this->writeAttributes($binary, $reader);
-                    if ($emptyElement) {
-                        $binary .= chr(Constants::RECORD_TYPE_END_ELEMENT);
-                    }
-                    break;
-
-                case XMLReader::TEXT:
-                    $this->writeTextRecord($binary, $reader->value);
-                    break;
-
-                case XMLReader::COMMENT:
-                    $binary .= chr(Constants::RECORD_TYPE_COMMENT);
-                    $this->writeString($binary, $reader->value);
-                    break;
-
-                case XMLReader::WHITESPACE:
-                    break;
-
-                case XMLReader::SIGNIFICANT_WHITESPACE:
-                    $this->writeTextRecord($binary, $reader->value);
-                    break;
-
-                case XMLReader::END_ELEMENT:
-                    // TODO: Use *_WITH_END_ELEMENT if possible
-                    $binary .= chr(Constants::RECORD_TYPE_END_ELEMENT);
-                    break;
-
-                case XMLReader::ATTRIBUTE:
-                    throw new EncodingException('Invalid encoding state.');
-                case XMLReader::DOC:
-                case XMLReader::DOC_TYPE:
-                case XMLReader::DOC_FRAGMENT:
-                case XMLReader::NOTATION:
-                case XMLReader::XML_DECLARATION:
-                case XMLReader::CDATA:
-                case XMLReader::ENTITY:
-                case XMLReader::ENTITY_REF:
-                case XMLReader::END_ENTITY:
-                case XMLReader::PI:
-                default:
-                    throw new EncodingException(sprintf('Unsupported XML node type %d.', $reader->nodeType));
-            }
+            throw new EncodingException(sprintf('XML Parsing Error "%s".', $message));
         }
 
-        $last_error = libxml_get_last_error();
+        $binary = '';
+        try {
+            while ($reader->read()) {
+                switch ($reader->nodeType) {
+                    case XMLReader::NONE:
+                        break;
+
+                    case XMLReader::ELEMENT:
+                        $index = $this->getDictionaryIndex($reader->localName);
+                        if ($reader->prefix && $index !== false) {
+                            $binary .= chr(Constants::RECORD_TYPE_DICTIONARY_ELEMENT);
+                            $this->writeString($binary, $reader->prefix);
+                            $this->writeDictionaryString($binary, $index);
+                        } elseif ($reader->prefix) {
+                            $binary .= chr(Constants::RECORD_TYPE_ELEMENT);
+                            $this->writeString($binary, $reader->prefix);
+                            $this->writeString($binary, $reader->localName);
+                        } elseif ($index !== false) {
+                            $binary .= chr(Constants::RECORD_TYPE_SHORT_DICTIONARY_ELEMENT);
+                            $this->writeDictionaryString($binary, $index);
+                        } else {
+                            $binary .= chr(Constants::RECORD_TYPE_SHORT_ELEMENT);
+                            $this->writeString($binary, $reader->localName);
+                        }
+                        $emptyElement = $reader->isEmptyElement;
+                        $this->writeAttributes($binary, $reader);
+                        if ($emptyElement) {
+                            $binary .= chr(Constants::RECORD_TYPE_END_ELEMENT);
+                        }
+                        break;
+
+                    case XMLReader::TEXT:
+                        $this->writeTextRecord($binary, $reader->value);
+                        break;
+
+                    case XMLReader::COMMENT:
+                        $binary .= chr(Constants::RECORD_TYPE_COMMENT);
+                        $this->writeString($binary, $reader->value);
+                        break;
+
+                    case XMLReader::WHITESPACE:
+                        break;
+
+                    case XMLReader::SIGNIFICANT_WHITESPACE:
+                        $this->writeTextRecord($binary, $reader->value);
+                        break;
+
+                    case XMLReader::END_ELEMENT:
+                        // TODO: Use *_WITH_END_ELEMENT if possible
+                        $binary .= chr(Constants::RECORD_TYPE_END_ELEMENT);
+                        break;
+
+                    case XMLReader::ATTRIBUTE:
+                        throw new EncodingException('Invalid encoding state.');
+                    case XMLReader::DOC:
+                    case XMLReader::DOC_TYPE:
+                    case XMLReader::DOC_FRAGMENT:
+                    case XMLReader::NOTATION:
+                    case XMLReader::XML_DECLARATION:
+                    case XMLReader::CDATA:
+                    case XMLReader::ENTITY:
+                    case XMLReader::ENTITY_REF:
+                    case XMLReader::END_ENTITY:
+                    case XMLReader::PI:
+                    default:
+                        throw new EncodingException(sprintf('Unsupported XML node type %d.', $reader->nodeType));
+                }
+            }
+
+            $last_error = libxml_get_last_error();
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousUseInternalErrors);
+        }
+
         if ($last_error !== false) {
             throw new EncodingException(sprintf('XML Parsing Error "%s".', rtrim($last_error->message)));
         }

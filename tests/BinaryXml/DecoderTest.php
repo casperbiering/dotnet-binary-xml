@@ -61,6 +61,17 @@ class DecoderTest extends \PHPUnit\Framework\TestCase
         $decoder->decode($binary);
     }
 
+    public function testTruncatedString()
+    {
+        $this->expectException(\CasperBiering\Dotnet\BinaryXml\DecodingException::class);
+        $this->expectExceptionMessage('Unexpected end of content at position 2.');
+
+        $binary = $this->convertToBinary('40 03 64 6F');
+        $decoder = new Decoder();
+
+        $decoder->decode($binary);
+    }
+
     public function testInvalidRecordType()
     {
         $this->expectException(\CasperBiering\Dotnet\BinaryXml\DecodingException::class);
@@ -184,12 +195,14 @@ class DecoderTest extends \PHPUnit\Framework\TestCase
             ['42 80 80 80 01 01', '<str2097152></str2097152>'],
             ['42 80 80 80 80 01 01', '<str268435456></str268435456>'],
             ['40 03 64 6F 63 06 EC 01 8E 00 00 00 80 00 00 00 00 01', '<doc str236="2147483648"></doc>'],
+            ['40 03 64 6F 63 8F FF FF FF FF FF FF FF FF', '<doc>-1</doc>'],
             ['42 9A 01 8F 00 00 00 00 00 01 00 00', '<str154>1099511627776</str154>'],
             ['40 03 64 6F 63 B2 FF FF FF FF FF FF FF FF 01', '<doc>18446744073709551615</doc>'],
             ['42 9A 01 B3 FE FF FF FF FF FF FF FF', '<str154>18446744073709551614</str154>'],
             ['40 03 64 6F 63 AC 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF 01', '<doc>urn:uuid:33221100-5544-7766-8899-aabbccddeeff</doc>'],
             ['42 1A AD 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF', '<str26>urn:uuid:33221100-5544-7766-8899-aabbccddeeff</str26>'],
             ['40 03 64 6F 63 AE 00 C4 F5 32 FF FF FF FF 01', '<doc>-PT5M44S</doc>'],
+            ['40 03 64 6F 63 AE 01 00 00 00 00 00 00 00 01', '<doc>PT0.0000001S</doc>'],
             ['42 94 07 AF 00 B0 8E F0 1B 00 00 00', '<str916>PT3H20M</str916>'],
             ['40 03 64 6F 63 B0 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 01', '<doc>03020100-0504-0706-0809-0a0b0c0d0e0f</doc>'],
             ['40 02 49 44 B1 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F', '<ID>03020100-0504-0706-0809-0a0b0c0d0e0f</ID>'],
