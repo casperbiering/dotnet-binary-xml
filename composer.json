@@ -18,8 +18,28 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "CasperBiering\\Dotnet\\Tests\\": "src/"
+            "CasperBiering\\Dotnet\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint": [
+            "@php -l src/BinaryXml.php",
+            "@php -l src/BinaryXml/Encoder.php",
+            "@php -l src/BinaryXml/Decoder.php",
+            "@php -l src/BinaryXml/SoapEncoder.php",
+            "@php -l src/BinaryXml/SoapDecoder.php",
+            "@php -l src/BinaryXml/Constants.php",
+            "@php -l src/BinaryXml/SoapConstants.php",
+            "@php -l src/BinaryXml/DecodingException.php",
+            "@php -l src/BinaryXml/EncodingException.php",
+            "@php -l tests/BinaryXml/DecoderTest.php",
+            "@php -l tests/BinaryXml/EncoderTest.php",
+            "@php -l tests/BinaryXml/TwoWayTest.php",
+            "@php -l tests/BinaryXml/SoapDecoderTest.php",
+            "@php -l tests/BinaryXml/SoapEncoderTest.php",
+            "@php -l decode.php"
+        ]
     },
     "license": "MIT",
     "authors": [

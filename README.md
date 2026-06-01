@@ -1,6 +1,6 @@
 # dotnet-binary-xml
 
-[![Build Status](https://travis-ci.org/casperbiering/dotnet-binary-xml.png?branch=master)](https://travis-ci.org/casperbiering/dotnet-binary-xml)
+[![CI](https://github.com/casperbiering/dotnet-binary-xml/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/casperbiering/dotnet-binary-xml/actions/workflows/ci.yaml)
 
 **dotnet-binary-xml** is a PHP implementation of the [.NET Binary Format: XML Data Structure (MC-NBFX)](http://msdn.microsoft.com/en-us/library/cc219210.aspx).
 
