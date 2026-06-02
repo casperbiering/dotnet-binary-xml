@@ -52,6 +52,7 @@ class Encoder
         }
 
         $binary = '';
+
         try {
             while ($reader->read()) {
                 switch ($reader->nodeType) {
