@@ -40,14 +40,14 @@ class Decoder
                     $pos += 1;
 
                     $writer->fullEndElement();
-                break;
+                    break;
                 case Constants::RECORD_TYPE_COMMENT:
                     $pos += 1;
 
                     $comment = $this->readString($content, $pos);
                     $writer->writeComment($comment);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_ARRAY:
                     $pos += 1;
 
@@ -68,7 +68,7 @@ class Decoder
                         $writer->writeElement($element, $value);
                     }
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_SHORT_ATTRIBUTE:
                     $pos += 1;
 
@@ -77,7 +77,7 @@ class Decoder
 
                     $writer->writeAttribute($name, $value);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_ATTRIBUTE:
                     $pos += 1;
 
@@ -87,7 +87,7 @@ class Decoder
 
                     $writer->writeAttribute($prefix.':'.$name, $value);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_SHORT_DICTIONARY_ATTRIBUTE:
                     $pos += 1;
 
@@ -96,7 +96,7 @@ class Decoder
 
                     $writer->writeAttribute($name, $value);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_DICTIONARY_ATTRIBUTE:
                     $pos += 1;
 
@@ -106,7 +106,7 @@ class Decoder
 
                     $writer->writeAttribute($prefix.':'.$name, $value);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_SHORT_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
@@ -114,7 +114,7 @@ class Decoder
 
                     $writer->writeAttribute('xmlns', $value);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
@@ -123,7 +123,7 @@ class Decoder
 
                     $writer->writeAttribute('xmlns:'.$name, $value);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_SHORT_DICTIONARY_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
@@ -131,7 +131,7 @@ class Decoder
 
                     $writer->writeAttribute('xmlns', $value);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_DICTIONARY_XMLNS_ATTRIBUTE:
                     $pos += 1;
 
@@ -140,7 +140,7 @@ class Decoder
 
                     $writer->writeAttribute('xmlns:'.$name, $value);
 
-                break;
+                    break;
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_A:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_B:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ATTRIBUTE_C:
@@ -173,7 +173,7 @@ class Decoder
                     $value = $this->readTextRecord($content, $pos);
 
                     $writer->writeAttribute($char.':'.$name, $value);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_A:
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_B:
                 case Constants::RECORD_TYPE_PREFIX_ATTRIBUTE_C:
@@ -206,33 +206,33 @@ class Decoder
                     $value = $this->readTextRecord($content, $pos);
 
                     $writer->writeAttribute($char.':'.$name, $value);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_SHORT_ELEMENT:
                     $pos += 1;
 
                     $name = $this->readString($content, $pos);
                     $writer->startElement($name);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_ELEMENT:
                     $pos += 1;
 
                     $prefix = $this->readString($content, $pos);
                     $name = $this->readString($content, $pos);
                     $writer->startElement($prefix.':'.$name);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_SHORT_DICTIONARY_ELEMENT:
                     $pos += 1;
 
                     $name = $this->readDictionaryString($content, $pos);
                     $writer->startElement($name);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_DICTIONARY_ELEMENT:
                     $pos += 1;
 
                     $prefix = $this->readString($content, $pos);
                     $name = $this->readDictionaryString($content, $pos);
                     $writer->startElement($prefix.':'.$name);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_A:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_B:
                 case Constants::RECORD_TYPE_PREFIX_DICTIONARY_ELEMENT_C:
@@ -264,7 +264,7 @@ class Decoder
                     $name = $this->readDictionaryString($content, $pos);
 
                     $writer->startElement($char.':'.$name);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_A:
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_B:
                 case Constants::RECORD_TYPE_PREFIX_ELEMENT_C:
@@ -296,7 +296,7 @@ class Decoder
                     $name = $this->readString($content, $pos);
 
                     $writer->startElement($char.':'.$name);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_ZERO_TEXT:
                 case Constants::RECORD_TYPE_ONE_TEXT:
                 case Constants::RECORD_TYPE_FALSE_TEXT:
@@ -329,7 +329,7 @@ class Decoder
                     $record = $this->readTextRecord($content, $pos);
 
                     $writer->text($record);
-                break;
+                    break;
                 case Constants::RECORD_TYPE_ZERO_TEXT_WITH_END_ELEMENT:
                 case Constants::RECORD_TYPE_ONE_TEXT_WITH_END_ELEMENT:
                 case Constants::RECORD_TYPE_FALSE_TEXT_WITH_END_ELEMENT:
@@ -363,10 +363,10 @@ class Decoder
 
                     $writer->text($record);
                     $writer->fullEndElement();
-                break;
+                    break;
                 default:
                     throw new DecodingException(sprintf('Unknown record type 0x%02X at position %d.', $currentRecordType, $pos));
-                break;
+                    break;
             }
         }
 
@@ -422,31 +422,31 @@ class Decoder
             case Constants::RECORD_TYPE_ZERO_TEXT:
             case Constants::RECORD_TYPE_ZERO_TEXT_WITH_END_ELEMENT:
                 return '0';
-            break;
+                break;
             case Constants::RECORD_TYPE_ONE_TEXT:
             case Constants::RECORD_TYPE_ONE_TEXT_WITH_END_ELEMENT:
                 return '1';
-            break;
+                break;
             case Constants::RECORD_TYPE_FALSE_TEXT:
             case Constants::RECORD_TYPE_FALSE_TEXT_WITH_END_ELEMENT:
                 return 'false';
-            break;
+                break;
             case Constants::RECORD_TYPE_TRUE_TEXT:
             case Constants::RECORD_TYPE_TRUE_TEXT_WITH_END_ELEMENT:
                 return 'true';
-            break;
+                break;
             case Constants::RECORD_TYPE_INT8_TEXT:
             case Constants::RECORD_TYPE_INT8_TEXT_WITH_END_ELEMENT:
                 return (string) $this->readInt8($content, $pos);
-            break;
+                break;
             case Constants::RECORD_TYPE_INT16_TEXT:
             case Constants::RECORD_TYPE_INT16_TEXT_WITH_END_ELEMENT:
                 return (string) $this->readInt16LE($content, $pos);
-            break;
+                break;
             case Constants::RECORD_TYPE_INT32_TEXT:
             case Constants::RECORD_TYPE_INT32_TEXT_WITH_END_ELEMENT:
                 return (string) $this->readInt32LE($content, $pos);
-            break;
+                break;
             case Constants::RECORD_TYPE_INT64_TEXT:
             case Constants::RECORD_TYPE_INT64_TEXT_WITH_END_ELEMENT:
 
@@ -460,19 +460,19 @@ class Decoder
                 }
 
                 return (string) gmp_strval($value, 10);
-            break;
+                break;
             case Constants::RECORD_TYPE_FLOAT_TEXT:
             case Constants::RECORD_TYPE_FLOAT_TEXT_WITH_END_ELEMENT:
                 $record = unpack('g', $this->readBytes($content, $pos, 4));
 
                 return (string) $record[1];
-            break;
+                break;
             case Constants::RECORD_TYPE_DOUBLE_TEXT:
             case Constants::RECORD_TYPE_DOUBLE_TEXT_WITH_END_ELEMENT:
                 $record = unpack('e', $this->readBytes($content, $pos, 8));
 
                 return (string) $record[1];
-            break;
+                break;
             case Constants::RECORD_TYPE_DECIMAL_TEXT:
             case Constants::RECORD_TYPE_DECIMAL_TEXT_WITH_END_ELEMENT:
 
@@ -515,7 +515,7 @@ class Decoder
 
                 return $record;
 
-            break;
+                break;
             case Constants::RECORD_TYPE_DATETIME_TEXT:
             case Constants::RECORD_TYPE_DATETIME_TEXT_WITH_END_ELEMENT:
 
@@ -563,7 +563,7 @@ class Decoder
                 }
 
                 return $record;
-            break;
+                break;
             case Constants::RECORD_TYPE_CHARS8_TEXT:
             case Constants::RECORD_TYPE_CHARS8_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readByte($content, $pos);
@@ -571,7 +571,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return $record;
-            break;
+                break;
             case Constants::RECORD_TYPE_CHARS16_TEXT:
             case Constants::RECORD_TYPE_CHARS16_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readUInt16LE($content, $pos);
@@ -579,7 +579,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return $record;
-            break;
+                break;
             case Constants::RECORD_TYPE_CHARS32_TEXT:
             case Constants::RECORD_TYPE_CHARS32_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readUInt32LE($content, $pos);
@@ -587,7 +587,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return $record;
-            break;
+                break;
             case Constants::RECORD_TYPE_BYTES8_TEXT:
             case Constants::RECORD_TYPE_BYTES8_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readByte($content, $pos);
@@ -595,7 +595,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return base64_encode($record);
-            break;
+                break;
             case Constants::RECORD_TYPE_BYTES16_TEXT:
             case Constants::RECORD_TYPE_BYTES16_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readUInt16LE($content, $pos);
@@ -603,7 +603,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return base64_encode($record);
-            break;
+                break;
             case Constants::RECORD_TYPE_BYTES32_TEXT:
             case Constants::RECORD_TYPE_BYTES32_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readUInt32LE($content, $pos);
@@ -611,7 +611,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return base64_encode($record);
-            break;
+                break;
             case Constants::RECORD_TYPE_START_LIST_TEXT:
 
                 $record = '';
@@ -625,15 +625,15 @@ class Decoder
                 $pos += 1; // skip 1 for end list
 
                 return $record;
-            break;
+                break;
             case Constants::RECORD_TYPE_EMPTY_TEXT:
             case Constants::RECORD_TYPE_EMPTY_TEXT_WITH_END_ELEMENT:
                 return '';
-            break;
+                break;
             case Constants::RECORD_TYPE_DICTIONARY_TEXT:
             case Constants::RECORD_TYPE_DICTIONARY_TEXT_WITH_END_ELEMENT:
                 return $this->readDictionaryString($content, $pos);
-            break;
+                break;
             case Constants::RECORD_TYPE_UNIQUEID_TEXT:
             case Constants::RECORD_TYPE_UNIQUEID_TEXT_WITH_END_ELEMENT:
             case Constants::RECORD_TYPE_UUID_TEXT:
@@ -657,7 +657,7 @@ class Decoder
                 }
 
                 return $record;
-            break;
+                break;
             case Constants::RECORD_TYPE_TIMESPAN_TEXT:
             case Constants::RECORD_TYPE_TIMESPAN_TEXT_WITH_END_ELEMENT:
                 if (!function_exists('gmp_init')) {
@@ -715,7 +715,7 @@ class Decoder
                 }
 
                 return $record;
-            break;
+                break;
             case Constants::RECORD_TYPE_UINT64_TEXT:
             case Constants::RECORD_TYPE_UINT64_TEXT_WITH_END_ELEMENT:
 
@@ -724,21 +724,21 @@ class Decoder
                 }
 
                 return (string) gmp_strval($this->readUInt64LE($content, $pos), 10);
-            break;
+                break;
             case Constants::RECORD_TYPE_BOOL_TEXT:
             case Constants::RECORD_TYPE_BOOL_TEXT_WITH_END_ELEMENT:
                 $record = $this->readByte($content, $pos);
                 switch ($record) {
                     case 0:
                         return 'false';
-                    break;
+                        break;
                     case 1:
                         return 'true';
-                    break;
+                        break;
                 }
 
                 throw new DecodingException(sprintf('Unknown boolean value 0x%02X at position %d.', $record, $pos));
-            break;
+                break;
             case Constants::RECORD_TYPE_UNICODECHARS8_TEXT:
             case Constants::RECORD_TYPE_UNICODECHARS8_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readByte($content, $pos);
@@ -746,7 +746,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return mb_convert_encoding($record, 'UTF-8', 'UTF-16');
-            break;
+                break;
             case Constants::RECORD_TYPE_UNICODECHARS16_TEXT:
             case Constants::RECORD_TYPE_UNICODECHARS16_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readUInt16LE($content, $pos);
@@ -754,7 +754,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return mb_convert_encoding($record, 'UTF-8', 'UTF-16');
-            break;
+                break;
             case Constants::RECORD_TYPE_UNICODECHARS32_TEXT:
             case Constants::RECORD_TYPE_UNICODECHARS32_TEXT_WITH_END_ELEMENT:
                 $recordLength = $this->readUInt32LE($content, $pos);
@@ -762,7 +762,7 @@ class Decoder
                 $record = $this->readBytes($content, $pos, $recordLength);
 
                 return mb_convert_encoding($record, 'UTF-8', 'UTF-16');
-            break;
+                break;
             case Constants::RECORD_TYPE_QNAMEDICTIONARY_TEXT:
             case Constants::RECORD_TYPE_QNAMEDICTIONARY_TEXT_WITH_END_ELEMENT:
                 $prefix = chr(97 + $this->readByte($content, $pos));
@@ -770,10 +770,10 @@ class Decoder
                 $name = $this->readDictionaryString($content, $pos);
 
                 return $prefix.':'.$name;
-            break;
+                break;
             default:
                 throw new DecodingException(sprintf('Unknown record type 0x%02X at position %d.', $recordType, $pos));
-            break;
+                break;
         }
     }
 
